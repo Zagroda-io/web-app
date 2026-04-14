@@ -15,7 +15,7 @@ export default function Page() {
         }
       >
         <AppSidebar variant="inset" />
-        <SidebarInset>
+        <SidebarInset className="bg-[rgb(251,251,251)] dark:bg-background">
           <SiteHeader />
           <div className="flex flex-1 flex-col p-4 lg:p-6">
             <div className="@container/main flex flex-1 flex-col gap-4">
