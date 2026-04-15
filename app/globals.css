@@ -111,8 +111,8 @@
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
     --sidebar: rgb(24 24 26);
-    --sidebar-inset: var(--background);
-    --header: var(--background);
+    --sidebar-inset: rgb(15 15 17);
+    --header: rgb(9 9 11);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.488 0.243 264.376);
     --sidebar-primary-foreground: oklch(0.985 0 0);
