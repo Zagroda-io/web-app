@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { CalendarIcon, DownloadIcon, PlusIcon, EllipsisIcon, SendIcon } from "lucide-react"
+import { CalendarIcon, DownloadIcon, PlusIcon, EllipsisIcon, SendIcon, TrendingUpIcon, BeefIcon, DropletIcon, PackageIcon } from "lucide-react"
 
 export default function Page() {
   const [activeItem, setActiveItem] = React.useState("Panel główny")
@@ -21,15 +21,15 @@ export default function Page() {
         return (
           <div className="space-y-4">
             <div className="flex flex-row items-center justify-between">
-              <h1 className="text-xl font-semibold tracking-tight lg:text-2xl">Dashboard</h1>
+              <h1 className="text-xl font-semibold tracking-tight lg:text-2xl">Panel główny</h1>
               <div className="flex items-center space-x-2">
                 <Button variant="outline" className="justify-start text-left font-normal">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  <span>18 Mar 2026 - 14 Apr 2026</span>
+                  <span>15 Kwi 2026 - 22 Kwi 2026</span>
                 </Button>
                 <Button variant="default">
                   <DownloadIcon className="mr-2 h-4 w-4" />
-                  <span className="hidden lg:inline">Download</span>
+                  <span className="hidden lg:inline">Eksportuj raport</span>
                 </Button>
               </div>
             </div>
@@ -37,29 +37,31 @@ export default function Page() {
             <div className="gap-4 space-y-4 lg:grid lg:grid-cols-3 lg:space-y-0">
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-semibold">Team Members</CardTitle>
-                  <CardDescription>Invite your team members to collaborate.</CardDescription>
+                  <CardTitle className="font-semibold">Stan stada</CardTitle>
+                  <CardDescription>Podsumowanie liczebności inwentarza.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-6">
                   {[
-                    { name: "Toby Belhome", email: "contact@bundui.io", role: "Viewer", avatar: "01" },
-                    { name: "Jackson Lee", email: "pre@example.com", role: "Developer", avatar: "02" },
-                    { name: "Hally Gray", email: "hally@site.com", role: "Viewer", avatar: "03" },
-                  ].map((member, i) => (
+                    { name: "Krowy mleczne", count: "42 szt.", trend: "+2", icon: <DropletIcon className="size-4 text-blue-500" /> },
+                    { name: "Jałówki", count: "15 szt.", trend: "0", icon: <BeefIcon className="size-4 text-orange-500" /> },
+                    { name: "Cielęta", count: "8 szt.", trend: "+1", icon: <TrendingUpIcon className="size-4 text-green-500" /> },
+                  ].map((group, i) => (
                     <div key={i} className="flex items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
-                        <Avatar className="size-8">
-                          <AvatarImage src={`/images/avatars/${member.avatar}.png`} />
-                          <AvatarFallback>{member.name[0]}</AvatarFallback>
-                        </Avatar>
+                        <div className="p-2 bg-muted rounded-full">
+                          {group.icon}
+                        </div>
                         <div>
-                          <p className="text-sm font-medium leading-none">{member.name}</p>
-                          <p className="text-sm text-muted-foreground">{member.email}</p>
+                          <p className="text-sm font-medium leading-none">{group.name}</p>
+                          <p className="text-sm text-muted-foreground">Aktualny stan</p>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm" className="ml-auto">
-                        {member.role}
-                      </Button>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold">{group.count}</p>
+                        <p className={`text-xs ${group.trend.startsWith('+') ? 'text-green-500' : 'text-muted-foreground'}`}>
+                          {group.trend !== '0' ? group.trend : ''}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </CardContent>
@@ -67,15 +69,16 @@ export default function Page() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-semibold">Subscriptions</CardTitle>
+                  <CardTitle className="font-semibold">Wydajność mleczna</CardTitle>
+                  <CardDescription>Średnia produkcja dobowa (litry).</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-semibold">+4850</div>
+                  <div className="text-3xl font-semibold">1,240 L</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    <span className="text-green-500">+180.1%</span> from last month
+                    <span className="text-green-500">+4.2%</span> względem wczoraj
                   </p>
                   <div className="mt-6 h-[100px] w-full flex items-end gap-1">
-                    {[40, 70, 45, 60, 50, 65, 70, 45].map((h, i) => (
+                    {[65, 50, 75, 80, 70, 85, 90, 95].map((h, i) => (
                       <div key={i} className="flex-1 bg-primary rounded-t-sm" style={{ height: `${h}%` }} />
                     ))}
                   </div>
@@ -87,11 +90,11 @@ export default function Page() {
                   <div className="flex items-center space-x-4">
                     <Avatar className="size-8">
                       <AvatarImage src="/images/avatars/04.png" />
-                      <AvatarFallback>SD</AvatarFallback>
+                      <AvatarFallback>JK</AvatarFallback>
                     </Avatar>
                     <div>
-                      <CardTitle className="text-sm">Sofia Davis</CardTitle>
-                      <CardDescription className="text-xs">m@example.com</CardDescription>
+                      <CardTitle className="text-sm">Jan Kowalski</CardTitle>
+                      <CardDescription className="text-xs">Weterynarz</CardDescription>
                     </div>
                   </div>
                   <Button variant="outline" size="icon" className="rounded-full size-8">
@@ -101,17 +104,17 @@ export default function Page() {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="bg-muted rounded-lg px-3 py-2 text-sm w-max max-w-[80%]">
-                      Hi, how can I help you today?
+                      Dzień dobry, czy podano już suplementy dla grupy B?
                     </div>
                     <div className="bg-primary text-primary-foreground rounded-lg px-3 py-2 text-sm ml-auto w-max max-w-[80%]">
-                      Hey, I'm having trouble with my account.
+                      Tak, wszystko podane zgodnie z planem rano.
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter>
                   <div className="flex w-full items-center space-x-2">
-                    <div className="flex-1 h-9 rounded-md border bg-muted/50 px-3 py-1 text-sm flex items-center text-muted-foreground">
-                      Type your message...
+                    <div className="flex-1 h-9 rounded-md border bg-muted/50 px-3 py-1 text-sm flex items-center text-muted-foreground text-xs">
+                      Napisz wiadomość do zespołu...
                     </div>
                     <Button size="icon" className="size-9">
                       <SendIcon className="h-4 w-4" />
@@ -123,37 +126,37 @@ export default function Page() {
               <Card className="lg:col-span-2">
                 <CardHeader className="flex flex-row items-start justify-between">
                   <div className="space-y-1.5">
-                    <CardTitle className="font-semibold">Latest Payments</CardTitle>
-                    <CardDescription>See recent payments from your customers here.</CardDescription>
+                    <CardTitle className="font-semibold">Ostatnie zdarzenia</CardTitle>
+                    <CardDescription>Najnowsze odnotowane aktywności w gospodarstwie.</CardDescription>
                   </div>
                   <div className="h-9 w-64 rounded-md border bg-muted/50 px-3 py-1 text-sm flex items-center text-muted-foreground">
-                    Filter payments...
+                    Szukaj zdarzenia...
                   </div>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Amount</TableHead>
+                        <TableHead>Zwierzę</TableHead>
+                        <TableHead>Typ zdarzenia</TableHead>
+                        <TableHead>Data</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {[
-                        { name: "Kenneth Thompson", email: "ken99@yahoo.com", amount: "$316.00", status: "success" },
-                        { name: "Abraham Lincoln", email: "abe45@gmail.com", amount: "$242.00", status: "success" },
-                        { name: "Monserrat Rodriguez", email: "monserrat44@gmail.com", amount: "$837.00", status: "processing" },
-                      ].map((payment, i) => (
+                        { animal: "PL002345", type: "Wycielenie", date: "Dzisiaj, 06:20", status: "Zakończone" },
+                        { animal: "PL005678", type: "Szczepienie", date: "Wczoraj, 14:00", status: "Zakończone" },
+                        { animal: "PL001122", type: "Kontrola wagi", date: "13 Kwi 2026", status: "Planowane" },
+                      ].map((event, i) => (
                         <TableRow key={i}>
-                          <TableCell className="font-medium">{payment.name}</TableCell>
-                          <TableCell>{payment.email}</TableCell>
-                          <TableCell>{payment.amount}</TableCell>
+                          <TableCell className="font-medium">{event.animal}</TableCell>
+                          <TableCell>{event.type}</TableCell>
+                          <TableCell>{event.date}</TableCell>
                           <TableCell>
-                            <Badge variant={payment.status === 'success' ? 'default' : 'secondary'} className="capitalize">
-                              {payment.status}
+                            <Badge variant={event.status === 'Zakończone' ? 'default' : 'secondary'} className="capitalize">
+                              {event.status}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
@@ -170,25 +173,34 @@ export default function Page() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="font-semibold">Payment Method</CardTitle>
-                  <CardDescription>Add a new payment method to your account.</CardDescription>
+                  <CardTitle className="font-semibold">Zapasy</CardTitle>
+                  <CardDescription>Stan kluczowych materiałów eksploatacyjnych.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-6">
-                  <div className="grid grid-cols-3 gap-4">
-                    {['Card', 'Paypal', 'Apple'].map((method) => (
-                      <div key={method} className="flex flex-col items-center justify-between rounded-md border-2 p-4 hover:bg-muted cursor-pointer transition-colors">
-                        <div className="mb-2 h-6 w-6 bg-muted-foreground/20 rounded" />
-                        <span className="text-xs font-medium">{method}</span>
+                  {[
+                    { item: "Paliwo (ON)", amount: "450 L", level: 30, icon: <PackageIcon className="size-4" /> },
+                    { item: "Pasza treściwa", amount: "1.2 t", level: 65, icon: <PackageIcon className="size-4" /> },
+                    { item: "Sól lizawka", amount: "15 szt.", level: 85, icon: <PackageIcon className="size-4" /> },
+                  ].map((stock, i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          {stock.icon}
+                          <span className="font-medium">{stock.item}</span>
+                        </div>
+                        <span className="text-muted-foreground">{stock.amount}</span>
                       </div>
-                    ))}
-                  </div>
-                  <div className="space-y-2 text-sm">
-                    <p className="font-medium">Name on the card</p>
-                    <div className="h-9 rounded-md border px-3" />
-                  </div>
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${stock.level < 40 ? 'bg-destructive' : 'bg-primary'}`} 
+                          style={{ width: `${stock.level}%` }} 
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full">Continue</Button>
+                  <Button className="w-full">Zamów materiały</Button>
                 </CardFooter>
               </Card>
             </div>
