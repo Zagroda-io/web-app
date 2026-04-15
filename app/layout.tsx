@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-sans",
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 })
 
 const fontMono = Geist_Mono({
