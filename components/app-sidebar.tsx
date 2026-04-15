@@ -15,7 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, ListIcon, ChartBarIcon, FolderIcon, UsersIcon, CameraIcon, FileTextIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon } from "lucide-react"
+import { LayoutDashboardIcon, UsersIcon, CalendarIcon, ActivityIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon, CameraIcon, FileTextIcon } from "lucide-react"
 
 const data = {
   user: {
@@ -25,7 +25,7 @@ const data = {
   },
   navMain: [
     {
-      title: "Dashboard",
+      title: "Panel główny",
       url: "#",
       icon: (
         <LayoutDashboardIcon
@@ -33,34 +33,26 @@ const data = {
       ),
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: (
-        <ListIcon
-        />
-      ),
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: (
-        <ChartBarIcon
-        />
-      ),
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: (
-        <FolderIcon
-        />
-      ),
-    },
-    {
-      title: "Team",
+      title: "Stado",
       url: "#",
       icon: (
         <UsersIcon
+        />
+      ),
+    },
+    {
+      title: "Zdarzenia",
+      url: "#",
+      icon: (
+        <CalendarIcon
+        />
+      ),
+    },
+    {
+      title: "Leczenie",
+      url: "#",
+      icon: (
+        <ActivityIcon
         />
       ),
     },
