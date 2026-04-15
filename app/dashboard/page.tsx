@@ -304,7 +304,7 @@ export default function Page() {
           onItemClick={setActiveItem}
         />
         <SidebarInset className="bg-sidebar-inset">
-          <SiteHeader title={activeItem} />
+          <SiteHeader />
           <div className="flex flex-1 flex-col overflow-auto">
             <div className="bg-muted/40 flex flex-1 flex-col p-4 lg:p-6">
               <div className="@container/main flex flex-1 flex-col gap-4 w-full">
