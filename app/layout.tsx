@@ -3,6 +3,12 @@ import { Geist_Mono, Outfit } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils";
+import { AnimatePresence } from "framer-motion"
+
+export const metadata = {
+  title: "Zagroda.io",
+  description: "Modern farm management",
+}
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -27,7 +33,11 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, outfit.variable, "font-sans")}
     >
       <body className="font-sans">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AnimatePresence mode="wait" initial={false}>
+            {children}
+          </AnimatePresence>
+        </ThemeProvider>
       </body>
     </html>
   )

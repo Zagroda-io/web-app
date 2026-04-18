@@ -11,11 +11,128 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CalendarIcon, DownloadIcon, PlusIcon, EllipsisIcon, SendIcon, TrendingUpIcon, BeefIcon, DropletIcon, PackageIcon } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { PageAnimate } from "@/components/page-animate"
+import { AnimatePresence } from "framer-motion"
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-row items-center justify-between">
+        <Skeleton className="h-8 w-48" />
+        <div className="flex items-center space-x-2">
+          <Skeleton className="h-9 w-40" />
+          <Skeleton className="h-9 w-32" />
+        </div>
+      </div>
+
+      <div className="gap-4 space-y-4 lg:grid lg:grid-cols-3 lg:space-y-0">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-32 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-40 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-9 w-24 mb-2" />
+            <Skeleton className="h-4 w-32 mb-6" />
+            <Skeleton className="h-[100px] w-full" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <div className="flex items-center space-x-4">
+              <Skeleton className="size-8 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </div>
+            <Skeleton className="size-8 rounded-full" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Skeleton className="h-10 w-[70%]" />
+            <Skeleton className="h-10 w-[70%] ml-auto" />
+          </CardContent>
+          <CardFooter>
+            <Skeleton className="h-9 w-full" />
+          </CardFooter>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader className="flex flex-row items-start justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+            <Skeleton className="h-9 w-64" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-24 mb-2" />
+            <Skeleton className="h-4 w-48" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-1.5 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-1.5 w-full" />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Skeleton className="h-10 w-full" />
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+  )
+}
 
 export default function Page() {
   const [activeItem, setActiveItem] = React.useState("Panel główny")
+  const [isLoading, setIsLoading] = React.useState(false)
+
+  const handleItemClick = (title: string) => {
+    if (title === activeItem) return;
+    
+    setIsLoading(true);
+    setActiveItem(title);
+    
+    // Symulacja ładowania danych dla efektu skeletona
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 400);
+  }
 
   const renderContent = () => {
+    if (isLoading) {
+      return <DashboardSkeleton />
+    }
+
     switch (activeItem) {
       case "Panel główny":
         return (
@@ -313,14 +430,18 @@ export default function Page() {
         <AppSidebar 
           variant="inset" 
           activeItem={activeItem}
-          onItemClick={setActiveItem}
+          onItemClick={handleItemClick}
         />
         <SidebarInset className="bg-sidebar-inset">
           <SiteHeader />
           <div className="flex flex-1 flex-col overflow-auto">
-            <div className="bg-muted/40 flex flex-1 flex-col p-4 lg:p-6">
+            <div className="flex flex-1 flex-col p-4 lg:p-6">
               <div className="@container/main flex flex-1 flex-col gap-4 w-full">
-                {renderContent()}
+                <AnimatePresence mode="wait">
+                  <PageAnimate key={activeItem}>
+                    {renderContent()}
+                  </PageAnimate>
+                </AnimatePresence>
               </div>
             </div>
           </div>
