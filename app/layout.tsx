@@ -2,6 +2,7 @@ import { Geist_Mono, Outfit } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/hooks/use-auth"
 import { cn } from "@/lib/utils";
 import { AnimatePresence } from "framer-motion"
 
@@ -33,11 +34,13 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, outfit.variable, "font-sans")}
     >
       <body className="font-sans">
-        <ThemeProvider>
-          <AnimatePresence mode="wait" initial={false}>
-            {children}
-          </AnimatePresence>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <AnimatePresence mode="wait" initial={false}>
+              {children}
+            </AnimatePresence>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )

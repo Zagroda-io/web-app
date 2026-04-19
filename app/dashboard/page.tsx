@@ -14,6 +14,8 @@ import { CalendarIcon, DownloadIcon, PlusIcon, EllipsisIcon, SendIcon, TrendingU
 import { Skeleton } from "@/components/ui/skeleton"
 import { PageAnimate } from "@/components/page-animate"
 import { AnimatePresence } from "framer-motion"
+import { useAuth } from "@/hooks/use-auth"
+import { useRouter } from "next/navigation"
 
 function DashboardSkeleton() {
   return (
@@ -113,8 +115,16 @@ function DashboardSkeleton() {
 }
 
 export default function Page() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
+  const router = useRouter()
   const [activeItem, setActiveItem] = React.useState("Panel główny")
   const [isLoading, setIsLoading] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push("/")
+    }
+  }, [isAuthenticated, authLoading, router])
 
   const handleItemClick = (title: string) => {
     if (title === activeItem) return;
@@ -415,6 +425,14 @@ export default function Page() {
       default:
         return <div>Wybierz sekcję z menu bocznego.</div>
     }
+  }
+
+  if (authLoading || !isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
   }
 
   return (
