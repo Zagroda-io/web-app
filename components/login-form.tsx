@@ -16,10 +16,16 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { PhoneIcon, MailIcon } from "lucide-react"
+import React from "react"
+
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [loginMethod, setLoginMethod] = React.useState<"email" | "phone">("email")
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -55,15 +61,49 @@ export function LoginForm({
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Lub kontynuuj przez
               </FieldSeparator>
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="jan.kowalski@przyklad.pl"
-                  required
-                />
-              </Field>
+              
+              <Tabs 
+                defaultValue="email" 
+                value={loginMethod} 
+                onValueChange={(v) => setLoginMethod(v as "email" | "phone")}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="email" className="flex items-center gap-2">
+                    <MailIcon className="size-4" />
+                    Email
+                  </TabsTrigger>
+                  <TabsTrigger value="phone" className="flex items-center gap-2">
+                    <PhoneIcon className="size-4" />
+                    Telefon
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="email" className="mt-0 space-y-4">
+                  <Field>
+                    <FieldLabel htmlFor="email">Email</FieldLabel>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="jan.kowalski@przyklad.pl"
+                      required
+                    />
+                  </Field>
+                </TabsContent>
+                
+                <TabsContent value="phone" className="mt-0 space-y-4">
+                  <Field>
+                    <FieldLabel htmlFor="phone">Numer telefonu</FieldLabel>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+48 123 456 789"
+                      required
+                    />
+                  </Field>
+                </TabsContent>
+              </Tabs>
+
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Hasło</FieldLabel>
