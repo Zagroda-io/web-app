@@ -16,8 +16,8 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { PhoneIcon, MailIcon, Loader2 } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Loader2, MailIcon, PhoneIcon } from "lucide-react"
 import React from "react"
 import { useAuth } from "@/hooks/use-auth"
 import { authService } from "@/services/auth-service"
@@ -27,12 +27,14 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [loginMethod, setLoginMethod] = React.useState<"email" | "phone">("email")
+  const [loginMethod, setLoginMethod] = React.useState<"email" | "phone">(
+    "email"
+  )
   const [isLoading, setIsLoading] = React.useState(false)
   const [email, setEmail] = React.useState("")
   const [phone, setPhone] = React.useState("")
   const [password, setPassword] = React.useState("")
-  
+
   const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,25 +42,28 @@ export function LoginForm({
     setIsLoading(true)
 
     try {
-      const payload = loginMethod === "email" 
-        ? { email, password } 
-        : { phoneNumber: phone, password }
+      const payload =
+        loginMethod === "email"
+          ? { email, password }
+          : { phoneNumber: phone, password }
 
       const response = await authService.login(payload)
-      
+
       // W prawdziwej aplikacji user data przyszłoby z innego endpointu lub byłoby w tokenie
       // Tutaj przekazujemy placeholder dla celów demonstracyjnych
-      login(response.accessToken, response.refreshToken, { 
-        id: "1", 
+      login(response.accessToken, response.refreshToken, {
+        id: "1",
         email: loginMethod === "email" ? email : undefined,
-        phoneNumber: loginMethod === "phone" ? phone : undefined
+        phoneNumber: loginMethod === "phone" ? phone : undefined,
       })
-      
+
       toast.success("Zalogowano pomyślnie!")
     } catch (error: any) {
-      const message = error.response?.status === 401 
-        ? "Błędny email lub hasło" 
-        : "Wystąpił błąd podczas logowania"
+      const message =
+        error.response?.status === 401
+          ? "Błędny email lub hasło"
+          : "Wystąpił błąd podczas logowania"
+
       toast.error(message)
     } finally {
       setIsLoading(false)
@@ -100,24 +105,30 @@ export function LoginForm({
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Lub kontynuuj przez
               </FieldSeparator>
-              
-              <Tabs 
-                defaultValue="email" 
-                value={loginMethod} 
+
+              <Tabs
+                defaultValue="email"
+                value={loginMethod}
                 onValueChange={(v) => setLoginMethod(v as "email" | "phone")}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2 mb-4">
-                  <TabsTrigger value="email" className="flex items-center gap-2">
+                <TabsList className="mb-4 grid w-full grid-cols-2">
+                  <TabsTrigger
+                    value="email"
+                    className="flex items-center gap-2"
+                  >
                     <MailIcon className="size-4" />
                     Email
                   </TabsTrigger>
-                  <TabsTrigger value="phone" className="flex items-center gap-2">
+                  <TabsTrigger
+                    value="phone"
+                    className="flex items-center gap-2"
+                  >
                     <PhoneIcon className="size-4" />
                     Telefon
                   </TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="email" className="mt-0 space-y-4">
                   <Field>
                     <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -132,7 +143,7 @@ export function LoginForm({
                     />
                   </Field>
                 </TabsContent>
-                
+
                 <TabsContent value="phone" className="mt-0 space-y-4">
                   <Field>
                     <FieldLabel htmlFor="phone">Numer telefonu</FieldLabel>
@@ -159,10 +170,10 @@ export function LoginForm({
                     Zapomniałeś hasła?
                   </a>
                 </div>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  required 
+                <Input
+                  id="password"
+                  type="password"
+                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
@@ -180,7 +191,13 @@ export function LoginForm({
                   )}
                 </Button>
                 <FieldDescription className="text-center">
-                  Nie masz konta? <a href="#" className="underline underline-offset-4 hover:text-primary">Zarejestruj się</a>
+                  Nie masz konta?{" "}
+                  <a
+                    href="#"
+                    className="underline underline-offset-4 hover:text-primary"
+                  >
+                    Zarejestruj się
+                  </a>
                 </FieldDescription>
               </Field>
             </FieldGroup>
@@ -188,8 +205,21 @@ export function LoginForm({
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">
-        Klikając kontynuuj, zgadzasz się na nasz <a href="/terms" className="underline underline-offset-4 hover:text-primary">Regulamin</a>{" "}
-        i <a href="/privacy" className="underline underline-offset-4 hover:text-primary">Politykę prywatności</a>.
+        Klikając kontynuuj, zgadzasz się na nasz{" "}
+        <a
+          href="/terms"
+          className="underline underline-offset-4 hover:text-primary"
+        >
+          Regulamin
+        </a>{" "}
+        i{" "}
+        <a
+          href="/privacy"
+          className="underline underline-offset-4 hover:text-primary"
+        >
+          Politykę prywatności
+        </a>
+        .
       </FieldDescription>
     </div>
   )
