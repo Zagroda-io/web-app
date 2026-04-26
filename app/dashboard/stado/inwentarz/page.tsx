@@ -16,7 +16,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 export default function LivestockPage() {
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center justify-between gap-2 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+      <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
           <Separator
@@ -45,7 +45,7 @@ export default function LivestockPage() {
           <ModeToggle />
         </div>
       </header>
-      <div className="flex flex-1 flex-col gap-4 p-6 pt-0">
+      <div className="flex flex-1 flex-col gap-4 p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-bold tracking-tight">
             Zarządzanie Stadem
