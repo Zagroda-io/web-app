@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react"
 import { format } from "date-fns"
 import { pl } from "date-fns/locale"
+import { HardwareStatusPopover } from "@/components/hardware/status-popover"
 
 interface DashboardSummary {
   userName: string
@@ -64,22 +65,24 @@ export function DashboardHeader() {
         </h1>
       </div>
       <div className="flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <div className="relative flex h-2 w-2">
-            <span
-              className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${data.systemsActive ? "bg-green-400" : "bg-red-400"}`}
-            ></span>
-            <span
-              className={`relative inline-flex h-2 w-2 rounded-full ${data.systemsActive ? "bg-green-500" : "bg-red-500"}`}
-            ></span>
-          </div>
-          <span>
-            {data.systemsActive
-              ? "Wszystkie systemy aktywne"
-              : "Uwaga: Problemy z systemami"}{" "}
-            · Synchronizacja {data.lastSyncMinutes} min. temu
-          </span>
-        </div>
+        <HardwareStatusPopover>
+          <button className="group flex items-center gap-2 text-sm text-muted-foreground transition-colors outline-none hover:text-foreground">
+            <div className="relative flex h-2 w-2">
+              <span
+                className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${data.systemsActive ? "bg-green-400" : "bg-red-400"}`}
+              ></span>
+              <span
+                className={`relative inline-flex h-2 w-2 rounded-full ${data.systemsActive ? "bg-green-500" : "bg-red-500"}`}
+              ></span>
+            </div>
+            <span className="decoration-dotted underline-offset-4 group-hover:underline">
+              {data.systemsActive
+                ? "Wszystkie systemy aktywne"
+                : "Uwaga: Problemy z systemami"}{" "}
+              · Synchronizacja {data.lastSyncMinutes} min. temu
+            </span>
+          </button>
+        </HardwareStatusPopover>
       </div>
     </div>
   )

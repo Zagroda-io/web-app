@@ -20,7 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Loader2, MailIcon, PhoneIcon } from "lucide-react"
 import React from "react"
 import { useAuth } from "@/hooks/use-auth"
-import { authService } from "@/services/auth-service"
+import { authService } from "@/api/auth-service"
 import { toast } from "sonner"
 
 export function LoginForm({
