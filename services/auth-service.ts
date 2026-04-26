@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api-client';
-import { LoginRequest, TokenResponse, RefreshRequest } from '@/types/auth';
+import { LoginRequest, TokenResponse, RefreshRequest, LogoutRequest } from '@/types/auth';
 
 export const authService = {
   login: async (data: LoginRequest): Promise<TokenResponse> => {
@@ -12,7 +12,8 @@ export const authService = {
     return response.data;
   },
 
-  logout: () => {
+  logout: async (data: LogoutRequest): Promise<void> => {
+    await apiClient.post('/auth/logout', data);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
   },

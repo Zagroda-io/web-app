@@ -48,14 +48,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/dashboard');
   };
 
-  const logout = () => {
-    authService.logout();
-    setAuthState({
-      user: null,
-      accessToken: null,
-      isAuthenticated: false,
-    });
-    router.push('/');
+  const logout = async () => {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (refreshToken) {
+        await authService.logout({ refreshToken });
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Nawet jeśli API zawiedzie, czyścimy stan lokalny
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    } finally {
+      setAuthState({
+        user: null,
+        accessToken: null,
+        isAuthenticated: false,
+      });
+      router.push('/');
+    }
   };
 
   return (

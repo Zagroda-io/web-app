@@ -13,6 +13,10 @@ export interface RefreshRequest {
   refreshToken: string;
 }
 
+export interface LogoutRequest {
+  refreshToken: string;
+}
+
 export interface User {
   id: string;
   email?: string;
