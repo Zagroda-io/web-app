@@ -1,4 +1,5 @@
-import { DashboardHeader } from "@/components/dashboard/header"
+import { LivestockList } from "@/components/dashboard/livestock-list"
+import { LivestockSummary } from "@/components/dashboard/livestock-summary"
 import { ModeToggle } from "@/components/mode-toggle"
 import Link from "next/link"
 import {
@@ -12,7 +13,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
-export default function Page() {
+export default function LivestockPage() {
   return (
     <>
       <header className="flex h-16 shrink-0 items-center justify-between gap-2 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -31,7 +32,11 @@ export default function Page() {
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Panel główny</BreadcrumbPage>
+                <BreadcrumbPage>Stado</BreadcrumbPage>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Inwentarz</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -41,13 +46,13 @@ export default function Page() {
         </div>
       </header>
       <div className="flex flex-1 flex-col gap-4 p-6 pt-0">
-        <DashboardHeader />
-        <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-          <div className="aspect-video rounded-xl bg-muted/50" />
-          <div className="aspect-video rounded-xl bg-muted/50" />
-          <div className="aspect-video rounded-xl bg-muted/50" />
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-bold tracking-tight">
+            Zarządzanie Stadem
+          </h2>
         </div>
-        <div className="min-h-screen flex-1 rounded-xl bg-muted/50 md:min-h-min" />
+        <LivestockSummary />
+        <LivestockList />
       </div>
     </>
   )

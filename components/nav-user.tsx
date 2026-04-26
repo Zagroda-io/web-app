@@ -22,9 +22,12 @@ import {
   ChevronsUpDownIcon,
   CreditCardIcon,
   LogOutIcon,
+  MoonIcon,
   SparklesIcon,
+  SunIcon,
 } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
+import { useTheme } from "next-themes"
 
 export function NavUser({
   user,
@@ -37,6 +40,7 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const { logout } = useAuth()
+  const { setTheme, resolvedTheme } = useTheme()
 
   return (
     <SidebarMenu>
@@ -78,6 +82,23 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem
+                onClick={() =>
+                  setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                }
+              >
+                {resolvedTheme === "dark" ? (
+                  <>
+                    <SunIcon />
+                    Jasny motyw
+                  </>
+                ) : (
+                  <>
+                    <MoonIcon />
+                    Ciemny motyw
+                  </>
+                )}
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <SparklesIcon />
                 Ulepsz do Pro

@@ -14,6 +14,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import {
+  BeefIcon,
   BookOpenIcon,
   FrameIcon,
   LayoutDashboardIcon,
@@ -55,13 +56,18 @@ const data = {
       url: "/dashboard",
       icon: <LayoutDashboardIcon />,
       isActive: true,
+    },
+    {
+      title: "Stado",
+      url: "/dashboard/stado/inwentarz",
+      icon: <BeefIcon />,
       items: [
         {
-          title: "Statystyki",
-          url: "#",
+          title: "Inwentarz",
+          url: "/dashboard/stado/inwentarz",
         },
         {
-          title: "Powiadomienia",
+          title: "Zdrowie",
           url: "#",
         },
       ],
