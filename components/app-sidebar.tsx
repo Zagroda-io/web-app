@@ -2,210 +2,157 @@
 
 import * as React from "react"
 
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
+import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
+import { TeamSwitcher } from "@/components/team-switcher"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar"
-import { LayoutDashboardIcon, UsersIcon, CalendarIcon, ActivityIcon, Settings2Icon, CircleHelpIcon, SearchIcon, DatabaseIcon, FileChartColumnIcon, FileIcon, CommandIcon, CameraIcon, FileTextIcon } from "lucide-react"
+import {
+  BookOpenIcon,
+  FrameIcon,
+  LayoutDashboardIcon,
+  MapIcon,
+  PieChartIcon,
+  Settings2Icon,
+  SproutIcon,
+  TractorIcon,
+  WheatIcon,
+} from "lucide-react"
 
+// This is sample data.
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: "Użytkownik",
+    email: "user@zagroda.io",
+    avatar: "/avatars/user.jpg",
   },
+  teams: [
+    {
+      name: "Zagroda Słoneczna",
+      logo: <SproutIcon />,
+      plan: "Gospodarstwo",
+    },
+    {
+      name: "Pole Pszenicy",
+      logo: <WheatIcon />,
+      plan: "Gospodarstwo",
+    },
+    {
+      name: "Agro-Technika",
+      logo: <TractorIcon />,
+      plan: "Usługi",
+    },
+  ],
   navMain: [
     {
-      title: "Panel główny",
-      url: "#",
-      icon: (
-        <LayoutDashboardIcon
-        />
-      ),
-    },
-    {
-      title: "Stado",
-      url: "#",
-      icon: (
-        <UsersIcon
-        />
-      ),
-    },
-    {
-      title: "Zdarzenia",
-      url: "#",
-      icon: (
-        <CalendarIcon
-        />
-      ),
-    },
-    {
-      title: "Leczenie",
-      url: "#",
-      icon: (
-        <ActivityIcon
-        />
-      ),
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: (
-        <CameraIcon
-        />
-      ),
+      title: "Panel Główny",
+      url: "/dashboard",
+      icon: <LayoutDashboardIcon />,
       isActive: true,
-      url: "#",
       items: [
         {
-          title: "Active Proposals",
+          title: "Statystyki",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "Powiadomienia",
           url: "#",
         },
       ],
     },
     {
-      title: "Proposal",
-      icon: (
-        <FileTextIcon
-        />
-      ),
+      title: "Uprawy",
       url: "#",
+      icon: <SproutIcon />,
       items: [
         {
-          title: "Active Proposals",
+          title: "Zasiewy",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "Zbiory",
+          url: "#",
+        },
+        {
+          title: "Magazyn",
           url: "#",
         },
       ],
     },
     {
-      title: "Prompts",
-      icon: (
-        <FileTextIcon
-        />
-      ),
+      title: "Dokumentacja",
       url: "#",
+      icon: <BookOpenIcon />,
       items: [
         {
-          title: "Active Proposals",
+          title: "Wprowadzenie",
           url: "#",
         },
         {
-          title: "Archived",
+          title: "Raporty",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Ustawienia",
+      url: "#",
+      icon: <Settings2Icon />,
+      items: [
+        {
+          title: "Ogólne",
+          url: "#",
+        },
+        {
+          title: "Gospodarstwo",
+          url: "#",
+        },
+        {
+          title: "Płatności",
           url: "#",
         },
       ],
     },
   ],
-  navSecondary: [
+  projects: [
     {
-      title: "Settings",
+      name: "Infrastruktura",
       url: "#",
-      icon: (
-        <Settings2Icon
-        />
-      ),
+      icon: <FrameIcon />,
     },
     {
-      title: "Get Help",
+      name: "Finanse",
       url: "#",
-      icon: (
-        <CircleHelpIcon
-        />
-      ),
+      icon: <PieChartIcon />,
     },
     {
-      title: "Search",
+      name: "Logistyka",
       url: "#",
-      icon: (
-        <SearchIcon
-        />
-      ),
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: (
-        <DatabaseIcon
-        />
-      ),
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: (
-        <FileChartColumnIcon
-        />
-      ),
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: (
-        <FileIcon
-        />
-      ),
+      icon: <MapIcon />,
     },
   ],
 }
 
-export function AppSidebar({ 
-  activeItem,
-  onItemClick,
-  ...props 
-}: React.ComponentProps<typeof Sidebar> & {
-  activeItem?: string;
-  onItemClick?: (title: string) => void;
-}) {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:p-1.5!"
-              onClick={() => onItemClick?.("Panel główny")}
-            >
-              <a href="#">
-                <CommandIcon className="size-5!" />
-                <span className="text-base font-semibold">Zagroda</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain 
-          items={data.navMain} 
-          activeItem={activeItem}
-          onItemClick={onItemClick}
-        />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={data.navMain} />
+        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }
