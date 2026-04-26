@@ -14,8 +14,6 @@ interface DashboardSummary {
 
 // Mock API call
 const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
-  // Symulacja opóźnienia sieci
-  await new Promise((resolve) => setTimeout(resolve, 500))
   return {
     userName: "Brunon",
     farmName: "Gospodarstwo Kowalski",

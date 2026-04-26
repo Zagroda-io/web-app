@@ -48,9 +48,7 @@ export default function RootLayout({
           <AlertProvider>
             <ThemeProvider>
               <TooltipProvider>
-                <AnimatePresence mode="wait" initial={false}>
-                  {children}
-                </AnimatePresence>
+                {children}
               </TooltipProvider>
               <Toaster />
             </ThemeProvider>

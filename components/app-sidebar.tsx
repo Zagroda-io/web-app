@@ -61,16 +61,6 @@ const data = {
       title: "Stado",
       url: "/dashboard/stado/inwentarz",
       icon: <BeefIcon />,
-      items: [
-        {
-          title: "Inwentarz",
-          url: "/dashboard/stado/inwentarz",
-        },
-        {
-          title: "Zdrowie",
-          url: "#",
-        },
-      ],
     },
     {
       title: "Uprawy",
