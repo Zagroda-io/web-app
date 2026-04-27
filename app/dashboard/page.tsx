@@ -1,6 +1,9 @@
 import { DashboardHeader } from "@/components/dashboard/header"
 import { HerdAlerts } from "@/components/dashboard/herd-alerts"
+import { HerdStatusCard } from "@/components/dashboard/herd-status"
 import { ModeToggle } from "@/components/mode-toggle"
+import { herdStatusMock } from "@/mocks/dashboard/herd-status"
+import { herdAlertsMock } from "@/mocks/dashboard/herd-alerts"
 import Link from "next/link"
 import {
   Breadcrumb,
@@ -45,15 +48,15 @@ export default function Page() {
         <DashboardHeader />
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
           <div className="space-y-4 lg:col-span-3">
-            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-              <div className="aspect-video rounded-xl bg-muted/50" />
-              <div className="aspect-video rounded-xl bg-muted/50" />
-              <div className="aspect-video rounded-xl bg-muted/50" />
+            <div className="grid gap-4 md:grid-cols-3">
+              <HerdStatusCard {...herdStatusMock} />
+              <div className="rounded-xl bg-muted/50" />
+              <div className="rounded-xl bg-muted/50" />
             </div>
             <div className="min-h-[400px] flex-1 rounded-xl bg-muted/50" />
           </div>
           <div className="lg:col-span-1">
-            <HerdAlerts />
+            <HerdAlerts alerts={herdAlertsMock} />
           </div>
         </div>
       </div>

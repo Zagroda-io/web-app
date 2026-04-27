@@ -50,29 +50,29 @@ export function DashboardHeader() {
   const formattedDate = format(currentTime, "EEEE, d MMM yyyy · HH:mm", {
     locale: pl,
   })
-  // Pierwsza litera wielka dla dnia tygodnia
+
   const capitalizedDate =
     formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1)
 
   return (
     <div className="flex flex-col justify-between gap-4 border-b pb-6 md:flex-row md:items-end">
       <div className="flex-1">
-        <div className="mb-1 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+        <div className="mb-0.5 text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
           Dzień dobry, {data.userName} — {capitalizedDate}
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        <h1 className="text-xl font-semibold tracking-[-0.3px] text-[#131720] dark:text-foreground">
           {data.farmName} — {data.location}
         </h1>
       </div>
       <div className="flex flex-col items-end gap-2">
         <HardwareStatusPopover>
-          <button className="group flex items-center gap-2 text-sm text-muted-foreground transition-colors outline-none hover:text-foreground">
-            <div className="relative flex h-2 w-2">
+          <button className="group flex items-center gap-1.5 text-xs text-[#8A93A2] transition-colors outline-none hover:text-[#131720] dark:text-muted-foreground/60 dark:hover:text-foreground">
+            <div className="relative flex h-1.75 w-1.75">
               <span
-                className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${data.systemsActive ? "bg-green-400" : "bg-red-400"}`}
+                className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 ${data.systemsActive ? "bg-[#22C55E]" : "bg-[#EF4444]"}`}
               ></span>
               <span
-                className={`relative inline-flex h-2 w-2 rounded-full ${data.systemsActive ? "bg-green-500" : "bg-red-500"}`}
+                className={`relative inline-flex h-1.75 w-1.75 rounded-full ${data.systemsActive ? "bg-[#22C55E]" : "bg-[#EF4444]"}`}
               ></span>
             </div>
             <span className="decoration-dotted underline-offset-4 group-hover:underline">

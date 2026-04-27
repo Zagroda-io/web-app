@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { AlertTriangle, Bookmark, CheckCircle, Clock, Info } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {
   Sheet,
@@ -17,100 +17,13 @@ import { AlertActions } from "./alert-details/alert-actions"
 import { AlertOverview } from "./alert-details/alert-overview"
 import { AlertEntities } from "./alert-details/alert-entities"
 import { AlertRiskProfile } from "./alert-details/alert-risk-profile"
+import { HerdAlert } from "@/mocks/dashboard/herd-alerts"
 
-interface HerdAlert {
-  id: string
-  type: "critical" | "warning" | "info" | "success"
-  title: string
-  description: string
-  time: string
-  hasVideo?: boolean
-  details?: {
-    metric?: string
-    value?: string
-    recommendation?: string
-    analysis?: string
-  }
+interface HerdAlertsProps {
+  alerts: HerdAlert[]
 }
 
-const mockAlerts: HerdAlert[] = [
-  {
-    id: "1",
-    type: "critical",
-    title: "Krowa #034 — podwyższona temperatura",
-    description: "39,8°C — możliwe zapalenie wymienia. Wymaga kontroli wet.",
-    time: "06:14",
-    details: {
-      metric: "Temperatura ciała",
-      value: "39,8°C (Norma: 38,5-39,2°C)",
-      recommendation:
-        "Odseparowanie od stada, pilna kontrola weterynaryjna, badanie wymienia.",
-      analysis:
-        "Wykryto gwałtowny wzrost temperatury w ciągu ostatnich 2 godzin (+1,2°C).",
-    },
-  },
-  {
-    id: "2",
-    type: "warning",
-    title: "Krowa #017 — spadek wydajności",
-    description: "–18% przez 3 dni. Kontrola paszy i kondycji ciała.",
-    time: "05:30",
-    details: {
-      metric: "Wydajność dojna",
-      value: "14,2 l (Średnia: 17,4 l)",
-      recommendation:
-        "Sprawdzenie dostępności paszy, kontrola apetytu, badanie BCS (Body Condition Score).",
-      analysis:
-        "Trend spadkowy utrzymuje się od poniedziałku. Brak innych objawów chorobowych.",
-    },
-  },
-  {
-    id: "3",
-    type: "warning",
-    title: "Krowa #061 — detekcja estrus",
-    description: "Optymalne okno inseminacji: 6–12h. Aktyw. +340%.",
-    time: "04:55",
-    hasVideo: true,
-    details: {
-      metric: "Aktywność ruchowa",
-      value: "+340% względem bazy",
-      recommendation: "Planowana inseminacja między 11:00 a 17:00.",
-      analysis:
-        "Analiza obrazu z kamery AI potwierdziła zachowania rujowe (obskakiwanie, niepokój).",
-    },
-  },
-  {
-    id: "4",
-    type: "info",
-    title: "Wizyta weterynaryjna — jutro 8:00",
-    description: "4 krowy do zbadania. BCS + kontrola wymion.",
-    time: "jutro",
-    details: {
-      metric: "Planowane badania",
-      value: "4 sztuki (#034, #012, #088, #055)",
-      recommendation: "Przygotowanie dokumentacji medycznej wybranych krów.",
-      analysis:
-        "Rutynowa kontrola okresowa oraz badanie zgłoszonego przypadku #034.",
-    },
-  },
-  {
-    id: "5",
-    type: "success",
-    title: "Wyniki badań mleka — Kwiecień",
-    description: "LKS: 48k, Białko: 3,42% — klasa Extra. Bonus +0,04 zł/l.",
-    time: "wczoraj",
-    details: {
-      metric: "Klasa jakości",
-      value: "Extra",
-      recommendation:
-        "Utrzymanie obecnego reżimu żywieniowego i higienicznego.",
-      analysis:
-        "Wszystkie parametry (LKS, LB, tłuszcz, białko) znajdują się w górnych 5% normy regionalnej.",
-    },
-  },
-]
-
-export function HerdAlerts() {
+export function HerdAlerts({ alerts }: HerdAlertsProps) {
   const [selectedAlert, setSelectedAlert] = useState<HerdAlert | null>(null)
 
   const getAlertIcon = (type: HerdAlert["type"]) => {
@@ -129,61 +42,80 @@ export function HerdAlerts() {
   const getAlertColorClass = (type: HerdAlert["type"]) => {
     switch (type) {
       case "critical":
-        return "bg-red-500/10 border-red-500/20"
+        return "bg-[#FEF2F2] dark:bg-red-950/30 text-[#EF4444] dark:text-red-400"
       case "warning":
-        return "bg-amber-500/10 border-amber-500/20"
+        return "bg-[#FFFBEB] dark:bg-amber-950/30 text-[#F59E0B] dark:text-amber-400"
       case "info":
-        return "bg-blue-500/10 border-blue-500/20"
+        return "bg-[#EBF0F5] dark:bg-blue-950/30 text-[#3A4F70] dark:text-blue-400"
       case "success":
-        return "bg-green-500/10 border-green-500/20"
+        return "bg-[#F0FDF4] dark:bg-green-950/30 text-[#15803D] dark:text-green-400"
     }
   }
 
   return (
     <>
-      <Card className="h-full">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">
-            Alerty stada
-          </CardTitle>
-          <Badge
-            variant="destructive"
-            className="h-5 px-2 text-[10px] font-medium"
-          >
-            3 aktywne
-          </Badge>
-        </CardHeader>
-        <CardContent className="p-0">
+      <Card className="overflow-hidden py-0" size="sm">
+        <div className="flex flex-col py-0">
+          <div className="flex items-center justify-between px-4 pt-1 pb-0">
+            <div className="text-[12px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
+              Alerty stada
+            </div>
+          </div>
+        </div>
+        <CardContent className="p-0 pt-2">
           <div className="flex flex-col">
-            {mockAlerts.map((alert) => (
+            {alerts.slice(0, 5).map((alert) => (
               <button
                 key={alert.id}
                 onClick={() => setSelectedAlert(alert)}
-                className="flex items-start gap-3 border-b px-4 py-3 text-left transition-colors last:border-0 hover:bg-muted/50"
+                className="flex items-start gap-2.5 border-b border-[#ECEEF2] px-4 py-[9px] text-left transition-colors last:border-0 hover:bg-[#F7F8FA] dark:border-border/40 dark:hover:bg-muted/20"
               >
                 <div
                   className={cn(
-                    "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border",
+                    "mt-[1px] flex size-7 shrink-0 items-center justify-center rounded-[7px]",
                     getAlertColorClass(alert.type)
                   )}
                 >
-                  {getAlertIcon(alert.type)}
+                  <span className="[&>svg]:size-[13px]">
+                    {getAlertIcon(alert.type)}
+                  </span>
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-sm font-medium text-foreground">
+                    <span className="truncate text-xs font-medium text-[#131720] dark:text-foreground">
                       {alert.title}
                     </span>
-                    <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                    <span className="shrink-0 font-mono text-[10px] text-[#B8BFCC] dark:text-muted-foreground/40">
                       {alert.time}
                     </span>
                   </div>
-                  <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                  <p className="mt-[1px] line-clamp-2 text-[11px] leading-[1.5] text-[#8A93A2] dark:text-muted-foreground/80">
                     {alert.description}
                   </p>
                 </div>
               </button>
             ))}
+          </div>
+
+          <div className="flex flex-wrap gap-1.5 px-4 pt-3 pb-3">
+            <Badge
+              variant="outline"
+              className="flex h-auto items-center rounded-[20px] border-none bg-[#FEF2F2] px-3 py-[3px] text-[11px] font-medium text-[#B91C1C] hover:bg-[#FEF2F2]/80 dark:bg-red-950/30 dark:text-red-400"
+            >
+              5 wysoki
+            </Badge>
+            <Badge
+              variant="outline"
+              className="flex h-auto items-center rounded-[20px] border-none bg-[#FEF3DC] px-3 py-[3px] text-[11px] font-medium text-[#B45309] hover:bg-[#FEF3DC]/80 dark:bg-amber-950/30 dark:text-amber-400"
+            >
+              3 średni
+            </Badge>
+            <Badge
+              variant="outline"
+              className="flex h-auto items-center rounded-[20px] border-none bg-[#F0FDF4] px-3 py-[3px] text-[11px] font-medium text-[#15803D] hover:bg-[#F0FDF4]/80 dark:bg-green-950/30 dark:text-green-400"
+            >
+              2 info
+            </Badge>
           </div>
         </CardContent>
       </Card>
@@ -263,23 +195,9 @@ export function HerdAlerts() {
                             ? "Średnia"
                             : "Niska"
                       }
-                      predictionData={[
-                        {
-                          label: "Wysoka temperatura",
-                          value: 85,
-                          color: "bg-red-500",
-                        },
-                        {
-                          label: "Spadek produkcji",
-                          value: 65,
-                          color: "bg-amber-500",
-                        },
-                        {
-                          label: "Anomalia zachowania",
-                          value: 15,
-                          color: "bg-green-500",
-                        },
-                      ]}
+                      predictionData={
+                        selectedAlert.details?.predictionData || []
+                      }
                       summary={
                         selectedAlert.details?.analysis ||
                         "System AI wykrył nieprawidłowości w zachowaniu i parametrach życiowych krowy. Zalecana jest natychmiastowa weryfikacja stanu zdrowia oraz konsultacja z lekarzem weterynarii."
@@ -287,20 +205,7 @@ export function HerdAlerts() {
                     />
 
                     <AlertEntities
-                      entities={[
-                        {
-                          match: 62,
-                          type: "Krowa",
-                          id: selectedAlert.title.match(/#\d+/)?.[0] || "#000",
-                          subType: "Krowa mleczna • Holstein",
-                        },
-                        {
-                          match: 6,
-                          type: "Krowa",
-                          id: "#012",
-                          subType: "Krowa mleczna • Jersey",
-                        },
-                      ]}
+                      entities={selectedAlert.details?.entities || []}
                     />
 
                     <AlertRiskProfile />
