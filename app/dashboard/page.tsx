@@ -1,4 +1,5 @@
 import { DashboardHeader } from "@/components/dashboard/header"
+import { HerdAlerts } from "@/components/dashboard/herd-alerts"
 import { ModeToggle } from "@/components/mode-toggle"
 import Link from "next/link"
 import {
@@ -42,13 +43,19 @@ export default function Page() {
       </header>
       <div className="flex flex-1 flex-col gap-4 p-6">
         <DashboardHeader />
-        <div className="grid auto-rows-min gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div className="aspect-video rounded-xl bg-muted/50" />
-          <div className="aspect-video rounded-xl bg-muted/50" />
-          <div className="aspect-video rounded-xl bg-muted/50" />
-          <div className="aspect-video rounded-xl bg-muted/50" />
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+          <div className="space-y-4 lg:col-span-3">
+            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+              <div className="aspect-video rounded-xl bg-muted/50" />
+              <div className="aspect-video rounded-xl bg-muted/50" />
+              <div className="aspect-video rounded-xl bg-muted/50" />
+            </div>
+            <div className="min-h-[400px] flex-1 rounded-xl bg-muted/50" />
+          </div>
+          <div className="lg:col-span-1">
+            <HerdAlerts />
+          </div>
         </div>
-        <div className="min-h-screen flex-1 rounded-xl bg-muted/50 md:min-h-min" />
       </div>
     </>
   )
