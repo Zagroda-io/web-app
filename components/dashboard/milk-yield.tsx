@@ -29,18 +29,17 @@ export function MilkYieldCard({
   return (
     <Card
       className={cn(
-        "relative overflow-hidden border-[#243047] bg-[#1A2336] text-white",
-        "before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(ellipse_at_85%_-5%,rgba(74,96,128,0.45)_0%,transparent_60%)]",
+        "relative overflow-hidden bg-[#131720] text-white border-none",
         className
       )}
       size="sm"
     >
       <div className="relative flex flex-col py-0">
         <div className="flex items-center justify-between px-4 pt-1 pb-0">
-          <div className="text-[12px] font-semibold tracking-[0.08em] text-[#8FA5C0] uppercase">
+          <div className="text-[10px] font-semibold tracking-[0.08em] text-slate-400 uppercase">
             Dzienna wydajność mleczna
           </div>
-          <div className="flex cursor-pointer items-center text-[11px] font-medium text-[#C5D2E0] transition-colors hover:underline">
+          <div className="flex cursor-pointer items-center text-[11px] font-medium text-slate-400 transition-colors hover:underline">
             Historia 30 dni <ChevronRight className="ml-0.5 h-3 w-3" />
           </div>
         </div>
@@ -50,7 +49,7 @@ export function MilkYieldCard({
             <span className="text-[52px] leading-[1] font-semibold tracking-[-1.5px] tabular-nums">
               {currentYield > 0 ? currentYield.toLocaleString() : "—"}
             </span>
-            <span className="mb-2 text-[18px] font-light text-[#8FA5C0]">
+            <span className="mb-2 text-[18px] font-light text-slate-400">
               l
             </span>
           </div>
@@ -58,7 +57,7 @@ export function MilkYieldCard({
           <div className="mb-2 flex flex-col">
             {currentYield > 0 ? (
               <div className="flex items-center gap-1.5">
-                <span className="flex items-center gap-0.5 text-[12px] font-medium text-[#22C55E]">
+                <span className="flex items-center gap-0.5 text-[12px] font-medium text-emerald-400">
                   <svg
                     width="11"
                     height="11"
@@ -71,10 +70,10 @@ export function MilkYieldCard({
                   </svg>
                   +{difference} l
                 </span>
-                <span className="text-[11px] text-[#6A85A8]">vs wczoraj</span>
+                <span className="text-[11px] text-slate-500">vs wczoraj</span>
               </div>
             ) : (
-              <span className="text-[11px] text-[#6A85A8]">Brak danych</span>
+              <span className="text-[11px] text-slate-500">Brak danych</span>
             )}
           </div>
         </div>
@@ -97,8 +96,8 @@ export function MilkYieldCard({
                       isToday
                         ? "bg-white/50"
                         : isLow
-                          ? "bg-[#EF4444]/45"
-                          : "bg-white/15 hover:bg-white/30"
+                          ? "bg-red-500/40 hover:bg-red-500/60"
+                          : "bg-white/10 hover:bg-white/20"
                     )}
                     style={{ height: `${height}%` }}
                     title={
@@ -112,7 +111,7 @@ export function MilkYieldCard({
             : Array.from({ length: 14 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-1 flex-1 rounded-t-[2px] bg-white/10"
+                  className="h-1 flex-1 rounded-t-[2px] bg-slate-800"
                 />
               ))}
         </div>

@@ -51,8 +51,14 @@ export default function Page() {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
           <div className="space-y-4 lg:col-span-3">
             <div className="grid gap-4 md:grid-cols-3">
-              <MilkYieldCard {...milkYieldMock} className="md:col-span-2" />
-              <HerdStatusCard {...herdStatusMock} />
+              <MilkYieldCard
+                {...milkYieldMock}
+                className="md:col-span-2"
+              />
+              <HerdStatusCard 
+                {...herdStatusMock} 
+                currentlyMilking={herdStatusMock.currentlyMilking}
+              />
             </div>
             <div className="min-h-[400px] flex-1 rounded-xl bg-muted/50" />
           </div>
