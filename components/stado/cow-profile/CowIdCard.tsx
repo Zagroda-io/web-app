@@ -27,16 +27,16 @@ export function CowIdCard({ cow }: CowIdCardProps) {
       size="sm"
     >
       {/* Górna sekcja */}
-      <div className="bg-slate-800 p-6 text-white">
+      <div className="bg-slate-800 p-6 text-white dark:bg-slate-900">
         <div className="mb-4 flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-700 text-2xl">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-700 text-2xl dark:bg-slate-800">
             🐄
           </div>
           <div>
             <h2 className="text-2xl font-bold">
               #{cow.id} {cow.name}
             </h2>
-            <p className="font-mono text-sm text-slate-300">
+            <p className="font-mono text-sm text-slate-300 dark:text-slate-400">
               {cow.earTagNumber}
             </p>
           </div>
@@ -54,19 +54,19 @@ export function CowIdCard({ cow }: CowIdCardProps) {
           {cow.status === "dry" && (
             <Badge
               variant="secondary"
-              className="border-none bg-slate-600 text-slate-100 hover:bg-slate-600"
+              className="border-none bg-slate-600 text-slate-100 hover:bg-slate-600 dark:bg-slate-700"
             >
               Zasuszenie
             </Badge>
           )}
-          <Badge variant="outline" className="border-slate-600 text-slate-100">
+          <Badge variant="outline" className="border-slate-600 text-slate-100 dark:border-slate-700">
             {cow.breed}
           </Badge>
         </div>
       </div>
 
       {/* Dolna sekcja */}
-      <div className="space-y-1 p-4">
+      <div className="space-y-1 p-4 bg-card">
         <DataField label="Wiek" value={cow.ageLabel} />
         <DataField
           label="Laktacja"
@@ -102,9 +102,9 @@ function DataField({
   valueClassName?: string
 }) {
   return (
-    <div className="flex justify-between border-b py-2 text-sm last:border-0">
-      <span className="text-muted-foreground">{label}</span>
-      <span className={cn("text-slate-900", valueClassName)}>{value}</span>
-    </div>
+      <div className="flex justify-between border-b py-2 text-sm last:border-0 border-border/50">
+        <span className="text-muted-foreground">{label}</span>
+        <span className={cn("text-foreground font-medium", valueClassName)}>{value}</span>
+      </div>
   )
 }

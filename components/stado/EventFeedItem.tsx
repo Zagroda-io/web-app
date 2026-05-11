@@ -17,13 +17,13 @@ const severityColors: Record<AlertSeverity, string> = {
 }
 
 const categoryColors: Record<FeedEventCategory, string> = {
-  alert: 'bg-red-50 text-red-700 border-red-100',
-  estrus: 'bg-amber-50 text-amber-700 border-amber-100',
-  yield: 'bg-amber-50 text-amber-700 border-amber-100',
-  vet: 'bg-slate-50 text-slate-700 border-slate-100',
-  insemination: 'bg-slate-50 text-slate-700 border-slate-100',
-  dry: 'bg-slate-50 text-slate-700 border-slate-100',
-  info: 'bg-slate-50 text-slate-700 border-slate-100',
+  alert: 'bg-red-50 text-red-700 border-red-100 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/30',
+  estrus: 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/30',
+  yield: 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/30',
+  vet: 'bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-800/30',
+  insemination: 'bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-800/30',
+  dry: 'bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-800/30',
+  info: 'bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-800/30',
 }
 
 export function EventFeedItem({ event, onClick }: EventFeedItemProps) {
@@ -61,7 +61,7 @@ export function EventFeedItem({ event, onClick }: EventFeedItemProps) {
       </div>
 
       <div className="min-w-0">
-        <div className="text-sm font-medium truncate text-slate-900">{event.title}</div>
+        <div className="text-sm font-medium truncate text-slate-900 dark:text-foreground">{event.title}</div>
         <div className="text-xs text-muted-foreground truncate">{event.description}</div>
       </div>
 

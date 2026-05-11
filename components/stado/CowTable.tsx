@@ -48,7 +48,7 @@ export function CowTable({
     <Card className="overflow-hidden py-0 shadow-none" size="sm">
       <div className="overflow-x-auto">
         <Table>
-          <TableHeader className="bg-slate-50/50">
+          <TableHeader className="bg-slate-50/50 dark:bg-muted/20">
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-8"></TableHead>
               <TableHead className="whitespace-nowrap text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">Numer / Imię</TableHead>

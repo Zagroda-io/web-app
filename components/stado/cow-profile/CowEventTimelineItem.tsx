@@ -28,14 +28,14 @@ export function CowEventTimelineItem({ event, onPlayClip }: CowEventTimelineItem
       />
 
       <div className="min-w-0">
-        <div className="text-sm font-medium text-slate-900 mb-0.5">{event.title}</div>
+        <div className="text-sm font-medium text-slate-900 mb-0.5 dark:text-foreground">{event.title}</div>
         <div className="text-xs text-muted-foreground leading-relaxed">{event.description}</div>
 
         {event.hasClip && (
           <Button
             variant="outline"
             size="sm"
-            className="mt-2 h-7 text-[10px] px-2 py-0 border-slate-200"
+            className="mt-2 h-7 text-[10px] px-2 py-0 border-slate-200 dark:border-border/50"
             onClick={() => onPlayClip(event.id)}
           >
             <Play className="mr-1.5 h-3 w-3 fill-current" />

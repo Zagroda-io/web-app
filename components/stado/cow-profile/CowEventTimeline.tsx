@@ -29,7 +29,7 @@ export function CowEventTimeline({
       className="gap-0 overflow-hidden p-0 py-0 shadow-none data-[size=sm]:py-0"
       size="sm"
     >
-      <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 px-4 py-3">
+      <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 px-4 py-3 dark:bg-muted/20">
         <h3 className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
           Historia zdarzeń
         </h3>
@@ -56,7 +56,7 @@ export function CowEventTimeline({
         </ToggleGroup>
       </CardHeader>
 
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y divide-slate-100 dark:divide-border/50">
         {filteredEvents.length === 0 ? (
           <div className="p-8 text-center text-sm text-muted-foreground">
             Brak zdarzeń dla wybranego filtra.

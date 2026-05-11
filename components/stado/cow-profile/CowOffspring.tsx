@@ -13,7 +13,7 @@ export function CowOffspring({ offspring, onCowClick }: CowOffspringProps) {
       className="gap-0 overflow-hidden p-0 py-0 shadow-none data-[size=sm]:py-0"
       size="sm"
     >
-      <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 px-4 py-3">
+      <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 px-4 py-3 dark:bg-muted/20">
         <h3 className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
           Potomstwo
         </h3>
@@ -54,7 +54,7 @@ export function CowOffspring({ offspring, onCowClick }: CowOffspringProps) {
               </div>
               <Badge
                 variant="outline"
-                className="shrink-0 border-slate-200 bg-slate-50 px-1.5 py-0 text-[10px]"
+                className="shrink-0 border-slate-200 bg-slate-50 px-1.5 py-0 text-[10px] dark:border-border/50 dark:bg-muted/20"
               >
                 {calf.status}
               </Badge>
