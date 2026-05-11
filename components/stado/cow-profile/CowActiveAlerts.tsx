@@ -7,9 +7,13 @@ import type { CowAlert } from "@/lib/types/stado.types"
 
 interface CowActiveAlertsProps {
   alerts: CowAlert[]
+  onAlertClick: (alert: CowAlert) => void
 }
 
-export function CowActiveAlerts({ alerts }: CowActiveAlertsProps) {
+export function CowActiveAlerts({
+  alerts,
+  onAlertClick,
+}: CowActiveAlertsProps) {
   if (alerts.length === 0) return null
 
   return (
@@ -32,7 +36,12 @@ export function CowActiveAlerts({ alerts }: CowActiveAlertsProps) {
         {alerts.map((alert) => (
           <div
             key={alert.id}
-            className="grid grid-cols-[32px_1fr_100px] items-start gap-3 bg-white p-4 dark:bg-card"
+            onClick={() => alert.details && onAlertClick(alert)}
+            className={cn(
+              "grid grid-cols-[32px_1fr_100px] items-start gap-3 bg-white p-4 transition-colors dark:bg-card",
+              alert.details &&
+                "cursor-pointer hover:bg-red-50/50 dark:hover:bg-red-950/10"
+            )}
           >
             <div
               className={cn(

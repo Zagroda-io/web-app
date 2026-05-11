@@ -8,7 +8,7 @@ import type { FeedEvent } from "@/lib/types/stado.types"
 interface EventFeedProps {
   events: FeedEvent[]
   isLoading?: boolean
-  onCowClick: (cowId: number) => void
+  onEventClick: (event: FeedEvent) => void
   onShowAll: () => void
   activeAlertCount: number
 }
@@ -16,7 +16,7 @@ interface EventFeedProps {
 export function EventFeed({
   events,
   isLoading,
-  onCowClick,
+  onEventClick,
   onShowAll,
   activeAlertCount,
 }: EventFeedProps) {
@@ -76,7 +76,7 @@ export function EventFeed({
                 <EventFeedItem
                   key={event.id}
                   event={event}
-                  onClick={onCowClick}
+                  onClick={onEventClick}
                 />
               ))}
       </div>

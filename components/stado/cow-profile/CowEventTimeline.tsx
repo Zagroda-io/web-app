@@ -4,11 +4,12 @@ import { useMemo, useState } from "react"
 import { Card, CardHeader } from "@/components/ui/card"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { CowEventTimelineItem } from "./CowEventTimelineItem"
-import type { CowEvent } from "@/lib/types/stado.types"
+import type { CowAlert, CowEvent } from "@/lib/types/stado.types"
 
 interface CowEventTimelineProps {
   events: CowEvent[]
   onPlayClip: (eventId: string) => void
+  onAlertClick: (alert: CowAlert) => void
 }
 
 type EventFilter = "all" | "wet" | "ins" | "alert"
@@ -16,6 +17,7 @@ type EventFilter = "all" | "wet" | "ins" | "alert"
 export function CowEventTimeline({
   events,
   onPlayClip,
+  onAlertClick,
 }: CowEventTimelineProps) {
   const [filter, setFilter] = useState<EventFilter>("all")
 
@@ -67,6 +69,7 @@ export function CowEventTimeline({
               key={event.id}
               event={event}
               onPlayClip={onPlayClip}
+              onAlertClick={onAlertClick}
             />
           ))
         )}
