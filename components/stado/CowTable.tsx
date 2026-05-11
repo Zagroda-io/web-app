@@ -49,16 +49,16 @@ export function CowTable({
       <div className="overflow-x-auto">
         <Table>
           <TableHeader className="bg-slate-50/50">
-            <TableRow>
+            <TableRow className="hover:bg-transparent">
               <TableHead className="w-8"></TableHead>
-              <TableHead className="whitespace-nowrap">Numer / Imię</TableHead>
-              <TableHead className="whitespace-nowrap">Kolczyk</TableHead>
-              <TableHead>Rasa</TableHead>
-              <TableHead>Wiek</TableHead>
-              <TableHead>Laktacja</TableHead>
-              <TableHead>BCS</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="whitespace-nowrap">Ostatni alert</TableHead>
+              <TableHead className="whitespace-nowrap text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">Numer / Imię</TableHead>
+              <TableHead className="whitespace-nowrap text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">Kolczyk</TableHead>
+              <TableHead className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">Rasa</TableHead>
+              <TableHead className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">Wiek</TableHead>
+              <TableHead className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">Laktacja</TableHead>
+              <TableHead className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">BCS</TableHead>
+              <TableHead className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">Status</TableHead>
+              <TableHead className="whitespace-nowrap text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">Ostatni alert</TableHead>
               <TableHead className="w-4"></TableHead>
             </TableRow>
           </TableHeader>

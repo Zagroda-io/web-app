@@ -22,7 +22,9 @@ export function CowBcsDisplay({ bcs }: CowBcsDisplayProps) {
 
   return (
     <Card className="flex-1 p-4 shadow-none" size="sm">
-      <h3 className="text-sm font-bold text-slate-800 mb-4">Ocena kondycji BCS</h3>
+      <h3 className="mb-4 text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
+        Ocena kondycji BCS
+      </h3>
       
       <div className="flex items-baseline gap-1">
         <span className="text-4xl font-bold" style={{ color: bcsColor }}>

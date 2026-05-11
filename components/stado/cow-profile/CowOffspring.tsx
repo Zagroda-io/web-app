@@ -14,10 +14,13 @@ export function CowOffspring({ offspring, onCowClick }: CowOffspringProps) {
       size="sm"
     >
       <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 px-4 py-3">
-        <h3 className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
+        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
           Potomstwo
         </h3>
-        <Badge variant="outline" className="h-5 px-1.5 text-[10px] font-bold">
+        <Badge
+          variant="outline"
+          className="h-5 rounded-[20px] border-none bg-slate-100 px-2 text-[10px] font-bold text-slate-600 dark:bg-muted/50 dark:text-muted-foreground"
+        >
           {offspring.length}
         </Badge>
       </CardHeader>

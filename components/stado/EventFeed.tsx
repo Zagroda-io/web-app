@@ -27,11 +27,11 @@ export function EventFeed({
     >
       <div className="flex items-center justify-between border-b bg-slate-50/50 px-4 py-3">
         <div className="flex items-center gap-3">
-          <span className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
+          <span className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
             Ostatnie zdarzenia
           </span>
           {activeAlertCount > 0 && (
-            <div className="flex items-center gap-1.5 rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-red-700">
+            <div className="flex items-center gap-1.5 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-600" />
               {activeAlertCount} aktywne alerty
             </div>

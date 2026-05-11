@@ -10,7 +10,7 @@ interface CowPedigreeProps {
 export function CowPedigree({ sire, dam, onCowClick }: CowPedigreeProps) {
   return (
     <div className="space-y-4 mb-4">
-      <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+      <div className="px-1 text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
         Rodowód
       </div>
       

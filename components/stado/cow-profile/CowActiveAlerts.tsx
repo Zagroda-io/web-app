@@ -18,10 +18,12 @@ export function CowActiveAlerts({ alerts }: CowActiveAlertsProps) {
       size="sm"
     >
       <CardHeader className="flex flex-row items-center justify-between border-b border-red-100 bg-red-50/50 px-4 py-3">
-        <h3 className="text-sm font-bold text-red-800">Aktywne alerty</h3>
+        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-red-800 uppercase">
+          Aktywne alerty
+        </h3>
         <Badge
           variant="destructive"
-          className="h-5 px-1.5 text-[10px] font-bold"
+          className="h-5 rounded-[20px] border-none px-2 text-[10px] font-bold"
         >
           {alerts.length}
         </Badge>

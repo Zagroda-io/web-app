@@ -12,7 +12,9 @@ export default function CowActivityChart({ activityHistory }: CowActivityChartPr
   return (
     <Card className="flex-1 p-4 shadow-none" size="sm">
       <CardHeader className="p-0 mb-4">
-        <h3 className="text-sm font-bold text-slate-800">Aktywność (7 dni)</h3>
+        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
+          Aktywność (7 dni)
+        </h3>
       </CardHeader>
 
       <div className="h-[80px] w-full">
