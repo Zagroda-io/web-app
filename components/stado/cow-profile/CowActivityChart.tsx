@@ -11,7 +11,7 @@ interface CowActivityChartProps {
 export default function CowActivityChart({ activityHistory }: CowActivityChartProps) {
   return (
     <Card className="flex-1 p-4 shadow-none" size="sm">
-      <CardHeader className="p-0 mb-4">
+      <CardHeader className="mb-4 p-0">
         <h3 className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
           Aktywność (7 dni)
         </h3>
@@ -24,15 +24,24 @@ export default function CowActivityChart({ activityHistory }: CowActivityChartPr
               {activityHistory.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={entry.activityIndex > 200 ? 'hsl(var(--amber-400))' : 'hsl(var(--primary))'}
+                  fill={
+                    entry.activityIndex > 200
+                      ? "hsl(var(--amber-400))"
+                      : "hsl(var(--primary))"
+                  }
                 />
               ))}
             </Bar>
-            <XAxis dataKey="dayLabel" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
+            <XAxis
+              dataKey="dayLabel"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 10 }}
+            />
             <Tooltip
-              cursor={{ fill: 'transparent' }}
-              formatter={(v: any) => [`${v}`, 'Aktywność']}
-              contentStyle={{ fontSize: '12px', borderRadius: '8px' }}
+              cursor={{ fill: "transparent" }}
+              formatter={(value) => [`${value}`, "Aktywność"]}
+              contentStyle={{ fontSize: "12px", borderRadius: "8px" }}
             />
           </BarChart>
         </ResponsiveContainer>
