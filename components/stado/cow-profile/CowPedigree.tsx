@@ -1,52 +1,75 @@
-import { cn } from '@/lib/utils'
-import type { CowSire, CowDam } from '@/lib/types/stado.types'
+import Link from "next/link"
+import { cn } from "@/lib/utils"
+import type { CowDam, CowSire } from "@/lib/types/stado.types"
 
 interface CowPedigreeProps {
   sire: CowSire
   dam: CowDam
-  onCowClick: (id: number) => void
+  onCowClick?: (id: number) => void
+  onCowClickUrlBase?: string
 }
 
-export function CowPedigree({ sire, dam, onCowClick }: CowPedigreeProps) {
+export function CowPedigree({
+  sire,
+  dam,
+  onCowClick,
+  onCowClickUrlBase,
+}: CowPedigreeProps) {
+  const DamCard = () => (
+    <div
+      className={cn(
+        "flex items-center gap-3 rounded-lg border border-l-2 border-l-amber-400 bg-muted/30 p-3 transition-colors",
+        dam.cowId ? "cursor-pointer hover:bg-muted/60" : ""
+      )}
+      onClick={() => !onCowClickUrlBase && dam.cowId && onCowClick?.(dam.cowId)}
+    >
+      <div className="w-7 text-center text-lg font-bold text-amber-600">♀</div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate font-mono text-xs font-bold">
+          {dam.identifier}
+        </div>
+        <div className="truncate text-xs text-muted-foreground">{dam.name}</div>
+      </div>
+      {dam.note && (
+        <div className="text-[10px] whitespace-nowrap text-muted-foreground">
+          {dam.note}
+        </div>
+      )}
+    </div>
+  )
+
   return (
-    <div className="space-y-4 mb-4">
+    <div className="mb-4 space-y-4">
       <div className="px-1 text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
         Rodowód
       </div>
-      
+
       {/* Ojciec */}
-      <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30 hover:bg-muted/60 transition-colors border-l-2 border-l-blue-400">
-        <div className="w-7 text-center text-blue-600 font-bold text-lg">♂</div>
-        <div className="flex-1 min-w-0">
-          <div className="font-mono text-xs font-bold truncate">{sire.identifier}</div>
-          <div className="text-xs text-muted-foreground truncate">{sire.name}</div>
+      <div className="flex items-center gap-3 rounded-lg border border-l-2 border-l-blue-400 bg-muted/30 p-3 transition-colors hover:bg-muted/60">
+        <div className="w-7 text-center text-lg font-bold text-blue-600">♂</div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate font-mono text-xs font-bold">
+            {sire.identifier}
+          </div>
+          <div className="truncate text-xs text-muted-foreground">
+            {sire.name}
+          </div>
         </div>
         {sire.whIndex && (
-          <div className="text-[10px] font-bold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">
+          <div className="rounded border border-blue-100 bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">
             {sire.whIndex}
           </div>
         )}
       </div>
 
       {/* Matka */}
-      <div 
-        className={cn(
-          "flex items-center gap-3 p-3 rounded-lg border bg-muted/30 transition-colors border-l-2 border-l-amber-400",
-          dam.cowId ? "hover:bg-muted/60 cursor-pointer" : ""
-        )}
-        onClick={() => dam.cowId && onCowClick(dam.cowId)}
-      >
-        <div className="w-7 text-center text-amber-600 font-bold text-lg">♀</div>
-        <div className="flex-1 min-w-0">
-          <div className="font-mono text-xs font-bold truncate">{dam.identifier}</div>
-          <div className="text-xs text-muted-foreground truncate">{dam.name}</div>
-        </div>
-        {dam.note && (
-          <div className="text-[10px] text-muted-foreground whitespace-nowrap">
-            {dam.note}
-          </div>
-        )}
-      </div>
+      {dam.cowId && onCowClickUrlBase ? (
+        <Link href={`${onCowClickUrlBase}/${dam.cowId}`}>
+          <DamCard />
+        </Link>
+      ) : (
+        <DamCard />
+      )}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import dynamic from "next/dynamic"
 import { CowProfileTopbar } from "./CowProfileTopbar"
 import { CowIdCard } from "./CowIdCard"
@@ -9,6 +10,8 @@ import { CowOffspring } from "./CowOffspring"
 import { CowBcsDisplay } from "./CowBcsDisplay"
 import { CowEventTimeline } from "./CowEventTimeline"
 import { Skeleton } from "@/components/ui/skeleton"
+import { motion } from "framer-motion"
+import { AlertDetailsSheet } from "../AlertDetailsSheet"
 import type { Cow, CowAlert } from "@/lib/types/stado.types"
 
 // Dynamic imports for Recharts components
@@ -24,18 +27,22 @@ const CowActivityChart = dynamic(() => import("./CowActivityChart"), {
 interface CowProfileProps {
   cow: Cow | null
   isLoading: boolean
-  onBack: () => void
-  onCowClick: (id: number) => void
-  onAlertClick: (alert: CowAlert) => void
+  onBack?: () => void
+  onBackUrl?: string
+  onCowClick?: (id: number) => void
+  onCowClickUrlBase?: string
 }
 
 export function CowProfile({
   cow,
   isLoading,
   onBack,
+  onBackUrl,
   onCowClick,
-  onAlertClick,
+  onCowClickUrlBase,
 }: CowProfileProps) {
+  const [selectedAlert, setSelectedAlert] = useState<CowAlert | null>(null)
+
   if (isLoading || !cow) {
     return (
       <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
@@ -57,14 +64,20 @@ export function CowProfile({
 
   const handlePlayClip = (eventId: string) => {
     console.log("Odtwarzanie klipu dla zdarzenia:", eventId)
-    // Implementacja Dialogu z wideo w StadoView lub tutaj
   }
 
   return (
-    <div className="flex flex-1 flex-col p-4 md:p-6">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="flex flex-1 flex-col p-4 md:p-6"
+    >
       <CowProfileTopbar
         cow={cow}
         onBack={onBack}
+        onBackUrl={onBackUrl}
         onEdit={() => console.log("Edytuj")}
         onAddEvent={() => console.log("Dodaj zdarzenie")}
       />
@@ -75,10 +88,19 @@ export function CowProfile({
           <CowIdCard cow={cow} />
           <CowActiveAlerts
             alerts={cow.activeAlerts}
-            onAlertClick={onAlertClick}
+            onAlertClick={setSelectedAlert}
           />
-          <CowPedigree sire={cow.sire} dam={cow.dam} onCowClick={onCowClick} />
-          <CowOffspring offspring={cow.offspring} onCowClick={onCowClick} />
+          <CowPedigree
+            sire={cow.sire}
+            dam={cow.dam}
+            onCowClick={onCowClick}
+            onCowClickUrlBase={onCowClickUrlBase}
+          />
+          <CowOffspring
+            offspring={cow.offspring}
+            onCowClick={onCowClick}
+            onCowClickUrlBase={onCowClickUrlBase}
+          />
         </div>
 
         {/* Prawa kolumna */}
@@ -90,9 +112,18 @@ export function CowProfile({
             <CowBcsDisplay bcs={cow.bcs} />
           </div>
 
-          <CowEventTimeline events={cow.events} onPlayClip={handlePlayClip} />
+          <CowEventTimeline
+            events={cow.events}
+            onPlayClip={handlePlayClip}
+            onAlertClick={setSelectedAlert}
+          />
         </div>
       </div>
-    </div>
+
+      <AlertDetailsSheet
+        alert={selectedAlert}
+        onClose={() => setSelectedAlert(null)}
+      />
+    </motion.div>
   )
 }

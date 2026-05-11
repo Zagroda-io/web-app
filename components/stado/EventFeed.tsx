@@ -9,6 +9,7 @@ interface EventFeedProps {
   events: FeedEvent[]
   isLoading?: boolean
   onEventClick: (event: FeedEvent) => void
+  onEventClickUrlBase?: string
   onShowAll: () => void
   activeAlertCount: number
 }
@@ -17,6 +18,7 @@ export function EventFeed({
   events,
   isLoading,
   onEventClick,
+  onEventClickUrlBase,
   onShowAll,
   activeAlertCount,
 }: EventFeedProps) {
@@ -77,6 +79,7 @@ export function EventFeed({
                   key={event.id}
                   event={event}
                   onClick={onEventClick}
+                  onClickUrlBase={onEventClickUrlBase}
                 />
               ))}
       </div>

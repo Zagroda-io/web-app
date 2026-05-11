@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -11,6 +12,7 @@ import type {
 interface EventFeedItemProps {
   event: FeedEvent
   onClick: (event: FeedEvent) => void
+  onClickUrlBase?: string
 }
 
 const severityColors: Record<AlertSeverity, string> = {
@@ -34,14 +36,15 @@ const categoryColors: Record<FeedEventCategory, string> = {
   info: "bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-800/30",
 }
 
-export function EventFeedItem({ event, onClick }: EventFeedItemProps) {
+export function EventFeedItem({
+  event,
+  onClick,
+  onClickUrlBase,
+}: EventFeedItemProps) {
   const isPulsing = event.severity === "red" || event.severity === "amber"
 
-  return (
-    <div
-      onClick={() => onClick(event.cowId)}
-      className="group grid cursor-pointer grid-cols-[16px_80px_100px_1fr_120px_24px] items-center gap-4 overflow-x-auto border-b px-4 py-3 transition-colors last:border-0 hover:bg-muted/50 md:overflow-x-visible"
-    >
+  const ItemContent = () => (
+    <>
       <div className="flex justify-center">
         <div
           className={cn(
@@ -87,6 +90,25 @@ export function EventFeedItem({ event, onClick }: EventFeedItemProps) {
       <div className="flex justify-end">
         <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
       </div>
+    </>
+  )
+
+  if (onClickUrlBase && !(event.category === "alert" && event.details)) {
+    return (
+      <Link href={`${onClickUrlBase}/${event.cowId}`}>
+        <div className="group grid cursor-pointer grid-cols-[16px_80px_100px_1fr_120px_24px] items-center gap-4 overflow-x-auto border-b px-4 py-3 transition-colors last:border-0 hover:bg-muted/50 md:overflow-x-visible">
+          <ItemContent />
+        </div>
+      </Link>
+    )
+  }
+
+  return (
+    <div
+      onClick={() => onClick(event)}
+      className="group grid cursor-pointer grid-cols-[16px_80px_100px_1fr_120px_24px] items-center gap-4 overflow-x-auto border-b px-4 py-3 transition-colors last:border-0 hover:bg-muted/50 md:overflow-x-visible"
+    >
+      <ItemContent />
     </div>
   )
 }
