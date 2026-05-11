@@ -155,4 +155,15 @@
     html {
         @apply font-sans;
     }
+
+    @supports (scrollbar-gutter: stable) {
+        html {
+            scrollbar-gutter: auto;
+        }
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--muted) transparent;
+    }
 }

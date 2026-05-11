@@ -14,12 +14,23 @@ import {
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/mode-toggle"
+import { HeaderUser } from "@/components/header-user"
+import { LivenessIndicator } from "@/components/liveness-indicator"
+import { Input } from "@/components/ui/input"
+import { BellIcon, SearchIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 const routeMap: Record<string, string> = {
   dashboard: "Panel główny",
   stado: "Stado",
-  "ustawienia": "Ustawienia",
-  "zalatwienia": "Załatwienia",
+  ustawienia: "Ustawienia",
+  zalatwienia: "Załatwienia",
+}
+
+const user = {
+  name: "Użytkownik",
+  email: "user@zagroda.io",
+  avatar: "/avatars/user.jpg",
 }
 
 export function ShellHeader() {
@@ -41,13 +52,13 @@ export function ShellHeader() {
                 <Link href="/dashboard">Zagroda</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            
+
             {pathSegments.map((segment, index) => {
               const isLast = index === pathSegments.length - 1
               const href = `/${pathSegments.slice(0, index + 1).join("/")}`
               const label = routeMap[segment] || segment
 
-              // Jeśli segment to 'dashboard' i jest przedostatni, a po nim jest coś jeszcze, 
+              // Jeśli segment to 'dashboard' i jest przedostatni, a po nim jest coś jeszcze,
               // to 'Zagroda' już go reprezentuje (jako link do /dashboard).
               if (segment === "dashboard" && !isLast) return null
 
@@ -69,8 +80,29 @@ export function ShellHeader() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
+
       <div className="flex items-center gap-2">
+        <div className="relative mr-2 hidden items-center md:flex">
+          <SearchIcon className="absolute left-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Szukaj..."
+            className="w-64 pl-9 lg:w-80"
+          />
+        </div>
+
+        <Separator orientation="vertical" className="mx-1 h-4" />
+
+        <Button variant="ghost" size="icon" className="h-9 w-9">
+          <BellIcon className="h-5 w-5" />
+          <span className="sr-only">Powiadomienia</span>
+        </Button>
+
+        <LivenessIndicator />
+
         <ModeToggle />
+
+        <HeaderUser user={user} />
       </div>
     </header>
   )
