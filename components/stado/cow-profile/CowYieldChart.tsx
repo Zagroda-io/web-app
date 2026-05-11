@@ -16,7 +16,7 @@ export default function CowYieldChart({ yieldHistory }: CowYieldChartProps) {
 
   return (
     <Card className="mb-4 p-4 shadow-none" size="sm">
-      <CardHeader className="flex flex-row items-center justify-between p-0 mb-4">
+      <CardHeader className="mb-4 flex flex-row items-center justify-between p-0">
         <h3 className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
           Wydajność (14 dni)
         </h3>
@@ -33,8 +33,16 @@ export default function CowYieldChart({ yieldHistory }: CowYieldChartProps) {
           <AreaChart data={yieldHistory}>
             <defs>
               <linearGradient id="yieldGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                <stop
+                  offset="5%"
+                  stopColor="hsl(var(--primary))"
+                  stopOpacity={0.15}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="hsl(var(--primary))"
+                  stopOpacity={0}
+                />
               </linearGradient>
             </defs>
             <Area
@@ -47,20 +55,22 @@ export default function CowYieldChart({ yieldHistory }: CowYieldChartProps) {
               activeDot={{ r: 4 }}
             />
             <XAxis dataKey="date" hide />
-            <YAxis hide domain={['auto', 'auto']} />
+            <YAxis hide domain={["auto", "auto"]} />
             <Tooltip
-              formatter={(v: number) => [`${v} l`, 'Wydajność']}
+              formatter={(value) => [`${value} l`, "Wydajność"]}
               labelFormatter={(label) => label}
-              contentStyle={{ fontSize: '12px', borderRadius: '8px' }}
+              contentStyle={{ fontSize: "12px", borderRadius: "8px" }}
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="flex justify-between mt-2 text-[10px] font-mono text-muted-foreground">
-        {yieldHistory.filter((_, i) => i % 3 === 0).map((d, i) => (
-          <span key={i}>{d.date}</span>
-        ))}
+      <div className="mt-2 flex justify-between font-mono text-[10px] text-muted-foreground">
+        {yieldHistory
+          .filter((_, i) => i % 3 === 0)
+          .map((d, i) => (
+            <span key={i}>{d.date}</span>
+          ))}
       </div>
     </Card>
   )
