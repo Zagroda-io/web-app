@@ -59,7 +59,7 @@ const data = {
     },
     {
       title: "Stado",
-      url: "/dashboard/stado/inwentarz",
+      url: "/dashboard/stado",
       icon: <BeefIcon />,
     },
     {
