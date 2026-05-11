@@ -17,7 +17,7 @@ export default function CowActivityChart({ activityHistory }: CowActivityChartPr
         </h3>
       </CardHeader>
 
-      <div className="h-[80px] w-full">
+      <div className="h-20 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={activityHistory}>
             <Bar dataKey="activityIndex" radius={[2, 2, 0, 0]}>
