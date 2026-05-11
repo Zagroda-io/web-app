@@ -11,19 +11,13 @@ interface CowTableRowProps {
   onClickUrlBase?: string
 }
 
-export function CowTableRow({
-  cow,
-  onClick,
-  onClickUrlBase,
-}: CowTableRowProps) {
-  const router = useRouter()
-  const getBcsColor = (bcs: number) => {
-    if (bcs < 2.5) return "text-destructive"
-    if (bcs < 3.0) return "text-amber-500"
-    return "text-green-600"
-  }
+interface RowContentProps {
+  cow: Cow
+  getBcsColor: (bcs: number) => string
+}
 
-  const RowContent = () => (
+function RowContent({ cow, getBcsColor }: RowContentProps) {
+  return (
     <>
       <TableCell className="w-8">
         <CowStatusBadge status={cow.status} mode="dot" />
@@ -68,6 +62,19 @@ export function CowTableRow({
       </TableCell>
     </>
   )
+}
+
+export function CowTableRow({
+  cow,
+  onClick,
+  onClickUrlBase,
+}: CowTableRowProps) {
+  const router = useRouter()
+  const getBcsColor = (bcs: number) => {
+    if (bcs < 2.5) return "text-destructive"
+    if (bcs < 3.0) return "text-amber-500"
+    return "text-green-600"
+  }
 
   if (onClickUrlBase) {
     return (
@@ -77,7 +84,7 @@ export function CowTableRow({
           router.push(`${onClickUrlBase}/${cow.id}`)
         }}
       >
-        <RowContent />
+        <RowContent cow={cow} getBcsColor={getBcsColor} />
       </TableRow>
     )
   }
@@ -87,7 +94,7 @@ export function CowTableRow({
       className="group cursor-pointer transition-colors hover:bg-muted/50"
       onClick={() => onClick?.(cow.id)}
     >
-      <RowContent />
+      <RowContent cow={cow} getBcsColor={getBcsColor} />
     </TableRow>
   )
 }

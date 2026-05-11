@@ -31,7 +31,7 @@ export default function CowActivityChart({ activityHistory }: CowActivityChartPr
             <XAxis dataKey="dayLabel" axisLine={false} tickLine={false} tick={{ fontSize: 10 }} />
             <Tooltip
               cursor={{ fill: 'transparent' }}
-              formatter={(v: number) => [`${v}`, 'Aktywność']}
+              formatter={(v: any) => [`${v}`, 'Aktywność']}
               contentStyle={{ fontSize: '12px', borderRadius: '8px' }}
             />
           </BarChart>

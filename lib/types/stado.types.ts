@@ -55,12 +55,13 @@ export interface CowOffspring {
 export interface CowEvent {
   id: string
   category: EventCategory
-  severity: "red" | "amber" | "green" | "info" | "neutral"
+  severity: AlertSeverity | "neutral"
   title: string
   description: string
   occurredAt: string // ISO datetime lub opis relatywny z backendu
   hasClip?: boolean // czy dostępny jest klip wideo 10s
   clipUrl?: string
+  details?: CowAlert["details"]
 }
 
 export interface CowYieldDay {

@@ -23,20 +23,19 @@ export function CowEventTimelineItem({
   onPlayClip,
   onAlertClick,
 }: CowEventTimelineItemProps) {
-  const isAlertWithDetails =
-    event.category === "alert" && (event as any).details
+  const isAlertWithDetails = event.category === "alert" && event.details
 
   return (
     <div
       onClick={() => {
-        if (isAlertWithDetails) {
+        if (isAlertWithDetails && event.severity !== "neutral") {
           onAlertClick({
             id: event.id,
-            severity: event.severity as any,
+            severity: event.severity,
             title: event.title,
             description: event.description,
             detectedAt: event.occurredAt,
-            details: (event as any).details,
+            details: event.details,
           })
         }
       }}

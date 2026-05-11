@@ -38,7 +38,7 @@ export function ShellHeader() {
   const pathSegments = pathname.split("/").filter(Boolean)
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+    <header className="relative flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <Separator
@@ -104,6 +104,12 @@ export function ShellHeader() {
 
         <HeaderUser user={user} />
       </div>
+
+      {/*<div className="absolute left-1/2 top-0 flex -translate-x-1/2 items-center justify-center pointer-events-none hidden lg:flex">*/}
+      {/*  <div className="rounded-b-xl border border-t-0 bg-background px-12 py-2.5 text-[19px] font-black tracking-[0.2em] text-foreground uppercase shadow-md border-border ring-1 ring-border/50 ring-inset">*/}
+      {/*    Zagroda*/}
+      {/*  </div>*/}
+      {/*</div>*/}
     </header>
   )
 }

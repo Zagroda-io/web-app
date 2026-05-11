@@ -9,13 +9,14 @@ interface CowPedigreeProps {
   onCowClickUrlBase?: string
 }
 
-export function CowPedigree({
-  sire,
-  dam,
-  onCowClick,
-  onCowClickUrlBase,
-}: CowPedigreeProps) {
-  const DamCard = () => (
+interface DamCardProps {
+  dam: CowDam
+  onCowClick?: (id: number) => void
+  onCowClickUrlBase?: string
+}
+
+function DamCard({ dam, onCowClick, onCowClickUrlBase }: DamCardProps) {
+  return (
     <div
       className={cn(
         "flex items-center gap-3 rounded-lg border border-l-2 border-l-amber-400 bg-muted/30 p-3 transition-colors",
@@ -37,7 +38,14 @@ export function CowPedigree({
       )}
     </div>
   )
+}
 
+export function CowPedigree({
+  sire,
+  dam,
+  onCowClick,
+  onCowClickUrlBase,
+}: CowPedigreeProps) {
   return (
     <div className="mb-4 space-y-4">
       <div className="px-1 text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
@@ -65,10 +73,18 @@ export function CowPedigree({
       {/* Matka */}
       {dam.cowId && onCowClickUrlBase ? (
         <Link href={`${onCowClickUrlBase}/${dam.cowId}`}>
-          <DamCard />
+          <DamCard
+            dam={dam}
+            onCowClick={onCowClick}
+            onCowClickUrlBase={onCowClickUrlBase}
+          />
         </Link>
       ) : (
-        <DamCard />
+        <DamCard
+          dam={dam}
+          onCowClick={onCowClick}
+          onCowClickUrlBase={onCowClickUrlBase}
+        />
       )}
     </div>
   )

@@ -9,12 +9,58 @@ interface CowOffspringProps {
   onCowClickUrlBase?: string
 }
 
-export function CowOffspring({
+interface CalfItemProps {
+  calf: CowOffspring
+  onCowClick?: (id: number) => void
+  onCowClickUrlBase?: string
+}
+
+function CalfItem({ calf, onCowClick, onCowClickUrlBase }: CalfItemProps) {
+  return (
+    <div
+      className="flex cursor-pointer items-center gap-3 border-b px-4 py-2.5 transition-colors first:pt-4 last:border-0 last:pb-4 hover:bg-muted/50"
+      onClick={() =>
+        !onCowClickUrlBase && calf.cowId && onCowClick?.(calf.cowId)
+      }
+    >
+      <div className="shrink-0 text-xl">
+        {calf.sex === "female" ? "🐄" : "🐂"}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="truncate font-mono text-xs font-bold">
+            {calf.earTagNumber}
+          </span>
+          <span className="text-[10px] text-muted-foreground uppercase">
+            {calf.sex === "female" ? "Cieliczka" : "Byczek"}
+          </span>
+        </div>
+        <div className="text-[10px] text-muted-foreground">
+          Urodz. {calf.birthDate}
+        </div>
+      </div>
+      <Badge
+        variant="outline"
+        className="shrink-0 px-1.5 py-0 text-[10px]"
+      >
+        {calf.status}
+      </Badge>
+    </div>
+  )
+}
+
+interface CardContentProps {
+  offspring: CowOffspring[]
+  onCowClick?: (id: number) => void
+  onCowClickUrlBase?: string
+}
+
+function CardContent({
   offspring,
   onCowClick,
   onCowClickUrlBase,
-}: CowOffspringProps) {
-  const CardContent = () => (
+}: CardContentProps) {
+  return (
     <div>
       {offspring.length === 0 ? (
         <div className="p-4 text-center text-sm text-muted-foreground">
@@ -22,49 +68,33 @@ export function CowOffspring({
         </div>
       ) : (
         offspring.map((calf) => {
-          const CalfItem = () => (
-            <div
-              className="flex cursor-pointer items-center gap-3 border-b px-4 py-2.5 transition-colors first:pt-4 last:border-0 last:pb-4 hover:bg-muted/50"
-              onClick={() =>
-                !onCowClickUrlBase && calf.cowId && onCowClick?.(calf.cowId)
-              }
-            >
-              <div className="shrink-0 text-xl">
-                {calf.sex === "female" ? "🐄" : "🐂"}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="truncate font-mono text-xs font-bold">
-                    {calf.earTagNumber}
-                  </span>
-                  <span className="text-[10px] text-muted-foreground uppercase">
-                    {calf.sex === "female" ? "Cieliczka" : "Byczek"}
-                  </span>
-                </div>
-                <div className="text-[10px] text-muted-foreground">
-                  Urodz. {calf.birthDate}
-                </div>
-              </div>
-              <Badge
-                variant="outline"
-                className="shrink-0 px-1.5 py-0 text-[10px]"
-              >
-                {calf.status}
-              </Badge>
-            </div>
-          )
-
           return calf.cowId && onCowClickUrlBase ? (
             <Link key={calf.id} href={`${onCowClickUrlBase}/${calf.cowId}`}>
-              <CalfItem />
+              <CalfItem
+                calf={calf}
+                onCowClick={onCowClick}
+                onCowClickUrlBase={onCowClickUrlBase}
+              />
             </Link>
           ) : (
-            <CalfItem key={calf.id} />
+            <CalfItem
+              key={calf.id}
+              calf={calf}
+              onCowClick={onCowClick}
+              onCowClickUrlBase={onCowClickUrlBase}
+            />
           )
         })
       )}
     </div>
   )
+}
+
+export function CowOffspring({
+  offspring,
+  onCowClick,
+  onCowClickUrlBase,
+}: CowOffspringProps) {
 
   return (
     <Card
@@ -82,7 +112,11 @@ export function CowOffspring({
           {offspring.length}
         </Badge>
       </CardHeader>
-      <CardContent />
+      <CardContent
+        offspring={offspring}
+        onCowClick={onCowClick}
+        onCowClickUrlBase={onCowClickUrlBase}
+      />
     </Card>
   )
 }
