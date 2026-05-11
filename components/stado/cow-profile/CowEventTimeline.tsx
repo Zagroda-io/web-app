@@ -26,7 +26,7 @@ export function CowEventTimeline({
 
   return (
     <Card
-      className="gap-0 overflow-hidden border border-slate-200 p-0 py-0 shadow-sm data-[size=sm]:py-0"
+      className="gap-0 overflow-hidden p-0 py-0 shadow-none data-[size=sm]:py-0"
       size="sm"
     >
       <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 px-4 py-3">

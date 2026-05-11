@@ -14,7 +14,7 @@ export function CowActiveAlerts({ alerts }: CowActiveAlertsProps) {
 
   return (
     <Card
-      className="mb-4 gap-0 overflow-hidden border-red-200 p-0 py-0 shadow-sm data-[size=sm]:py-0"
+      className="mb-4 gap-0 overflow-hidden p-0 py-0 shadow-none data-[size=sm]:py-0"
       size="sm"
     >
       <CardHeader className="flex flex-row items-center justify-between border-b border-red-100 bg-red-50/50 px-4 py-3">

@@ -45,7 +45,7 @@ export function CowTable({
   }, [cows, searchQuery, statusFilter])
 
   return (
-    <Card className="overflow-hidden py-0" size="sm">
+    <Card className="overflow-hidden py-0 shadow-none" size="sm">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader className="bg-slate-50/50">

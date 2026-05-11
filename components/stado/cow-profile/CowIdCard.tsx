@@ -23,7 +23,7 @@ export function CowIdCard({ cow }: CowIdCardProps) {
 
   return (
     <Card
-      className="mb-4 gap-0 overflow-hidden p-0 py-0 data-[size=sm]:py-0"
+      className="mb-4 gap-0 overflow-hidden p-0 py-0 shadow-none data-[size=sm]:py-0"
       size="sm"
     >
       {/* Górna sekcja */}

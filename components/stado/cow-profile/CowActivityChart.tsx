@@ -10,7 +10,7 @@ interface CowActivityChartProps {
 
 export default function CowActivityChart({ activityHistory }: CowActivityChartProps) {
   return (
-    <Card className="flex-1 p-4" size="sm">
+    <Card className="flex-1 p-4 shadow-none" size="sm">
       <CardHeader className="p-0 mb-4">
         <h3 className="text-sm font-bold text-slate-800">Aktywność (7 dni)</h3>
       </CardHeader>

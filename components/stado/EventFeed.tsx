@@ -22,7 +22,7 @@ export function EventFeed({
 }: EventFeedProps) {
   return (
     <Card
-      className="gap-0 overflow-hidden p-0 py-0 data-[size=sm]:py-0"
+      className="gap-0 overflow-hidden p-0 py-0 shadow-none data-[size=sm]:py-0"
       size="sm"
     >
       <div className="flex items-center justify-between border-b bg-slate-50/50 px-4 py-3">

@@ -15,7 +15,7 @@ export default function CowYieldChart({ yieldHistory }: CowYieldChartProps) {
     : '0.0'
 
   return (
-    <Card className="mb-4 p-4" size="sm">
+    <Card className="mb-4 p-4 shadow-none" size="sm">
       <CardHeader className="flex flex-row items-center justify-between p-0 mb-4">
         <h3 className="text-sm font-bold text-slate-800">Wydajność (14 dni)</h3>
         <Badge variant="outline" className="font-mono text-[10px] bg-primary/5 text-primary border-primary/20">
