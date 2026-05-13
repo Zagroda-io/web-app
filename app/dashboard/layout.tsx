@@ -3,14 +3,21 @@ import { PageTransition } from "@/components/page-transition"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { AnimatePresence } from "framer-motion"
 import { ShellHeader } from "@/components/shell-header"
+import { cookies } from "next/headers"
 
-export default function DashboardLayout({
+export const dynamic = "force-dynamic"
+
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const cookieStore = await cookies()
+  const sidebarState = cookieStore.get("sidebar_state")?.value
+  const defaultOpen = sidebarState !== "false"
+
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar />
       <SidebarInset>
         <ShellHeader />
