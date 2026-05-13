@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -19,6 +19,7 @@ import { LivenessIndicator } from "@/components/liveness-indicator"
 import { Input } from "@/components/ui/input"
 import { BellIcon, SearchIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getCowById } from "@/api/stado"
 
 const routeMap: Record<string, string> = {
   dashboard: "Panel główny",
@@ -36,6 +37,39 @@ const user = {
 export function ShellHeader() {
   const pathname = usePathname()
   const pathSegments = pathname.split("/").filter(Boolean)
+  const [cowData, setCowData] = useState<{ id: number; label: string } | null>(
+    null
+  )
+
+  useEffect(() => {
+    const isCowProfile =
+      pathSegments.length >= 3 &&
+      pathSegments[0] === "dashboard" &&
+      pathSegments[1] === "stado"
+
+    if (isCowProfile) {
+      const cowId = parseInt(pathSegments[2])
+      if (!isNaN(cowId)) {
+        // Unikamy ponownego pobierania, jeśli już mamy te dane
+        if (cowData?.id === cowId) return
+
+        getCowById(cowId)
+          .then((cow) => {
+            if (cow) {
+              setCowData({
+                id: cow.id,
+                label: `${cow.earTagNumber} | ${cow.name}`,
+              })
+            }
+          })
+          .catch((err) => {
+            console.error("Failed to fetch cow data for breadcrumb:", err)
+          })
+      }
+    } else {
+      setCowData(null)
+    }
+  }, [pathSegments, cowData?.id])
 
   return (
     <header className="relative flex h-16 shrink-0 items-center justify-between gap-2 border-b bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
@@ -56,7 +90,19 @@ export function ShellHeader() {
             {pathSegments.map((segment, index) => {
               const isLast = index === pathSegments.length - 1
               const href = `/${pathSegments.slice(0, index + 1).join("/")}`
-              const label = routeMap[segment] || segment
+
+              let label = routeMap[segment] || segment
+
+              // Jeśli to ID krowy w ścieżce /dashboard/stado/:id
+              if (
+                index === 2 &&
+                pathSegments[0] === "dashboard" &&
+                pathSegments[1] === "stado" &&
+                cowData &&
+                cowData.id === parseInt(segment)
+              ) {
+                label = cowData.label
+              }
 
               // Jeśli segment to 'dashboard' i jest przedostatni, a po nim jest coś jeszcze,
               // to 'Zagroda' już go reprezentuje (jako link do /dashboard).
