@@ -6,6 +6,9 @@ import { EventFeed } from "./EventFeed"
 import { CowTable } from "./CowTable"
 import { motion } from "framer-motion"
 import { AlertDetailsSheet } from "./AlertDetailsSheet"
+import { HerdKpiSection } from "./kpi/HerdKpiSection"
+import { UpcomingCalvingsWidget } from "./kpi/UpcomingCalvingsWidget"
+import { mockHerdKpiData } from "@/mocks/herdMocks"
 import type {
   Cow,
   CowAlert,
@@ -57,14 +60,23 @@ export default function StadoView({
           onFilterChange={setStatusFilter}
         />
 
-        <div className="space-y-4">
-          <EventFeed
-            events={initialFeed}
-            activeAlertCount={summary.activeAlertCount}
-            onEventClick={handleEventClick}
-            onEventClickUrlBase="/dashboard/stado"
-            onShowAll={() => console.log("Pokaż wszystkie zdarzenia")}
-          />
+        <div className="space-y-6">
+          <HerdKpiSection data={mockHerdKpiData} />
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <UpcomingCalvingsWidget
+              data={mockHerdKpiData.upcomingCalvings}
+              onShowAll={() => console.log("Pokaż wszystkie porody")}
+            />
+
+            <EventFeed
+              events={initialFeed}
+              activeAlertCount={summary.activeAlertCount}
+              onEventClick={handleEventClick}
+              onEventClickUrlBase="/dashboard/stado"
+              onShowAll={() => console.log("Pokaż wszystkie zdarzenia")}
+            />
+          </div>
 
           <CowTable
             cows={initialCows}
