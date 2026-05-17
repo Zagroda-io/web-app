@@ -4,6 +4,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { AnimatePresence } from "framer-motion"
 import { ShellHeader } from "@/components/shell-header"
 import { cookies } from "next/headers"
+import { UserProvider } from "@/context/UserContext"
 
 export const dynamic = "force-dynamic"
 
@@ -17,14 +18,16 @@ export default async function DashboardLayout({
   const defaultOpen = sidebarState !== "false"
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
-      <AppSidebar />
-      <SidebarInset>
-        <ShellHeader />
-        <AnimatePresence mode="wait">
-          <PageTransition>{children}</PageTransition>
-        </AnimatePresence>
-      </SidebarInset>
-    </SidebarProvider>
+    <UserProvider>
+      <SidebarProvider defaultOpen={defaultOpen}>
+        <AppSidebar />
+        <SidebarInset>
+          <ShellHeader />
+          <AnimatePresence mode="wait">
+            <PageTransition>{children}</PageTransition>
+          </AnimatePresence>
+        </SidebarInset>
+      </SidebarProvider>
+    </UserProvider>
   )
 }
