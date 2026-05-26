@@ -12,9 +12,8 @@ import { CowEventTimeline } from "./CowEventTimeline"
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 import { AlertDetailsSheet } from "../AlertDetailsSheet"
-import type { Cow, CowAlert } from "@/lib/types/stado.types"
+import type { AnimalDetails, CowAlert } from "@/lib/types/stado.types"
 
-// Dynamic imports for Recharts components
 const CowYieldChart = dynamic(() => import("./CowYieldChart"), {
   ssr: false,
   loading: () => <Skeleton className="mb-4 h-[160px] w-full" />,
@@ -25,7 +24,7 @@ const CowActivityChart = dynamic(() => import("./CowActivityChart"), {
 })
 
 interface CowProfileProps {
-  cow: Cow | null
+  animal: AnimalDetails | null
   isLoading: boolean
   onBack?: () => void
   onBackUrl?: string
@@ -34,7 +33,7 @@ interface CowProfileProps {
 }
 
 export function CowProfile({
-  cow,
+  animal,
   isLoading,
   onBack,
   onBackUrl,
@@ -43,7 +42,7 @@ export function CowProfile({
 }: CowProfileProps) {
   const [selectedAlert, setSelectedAlert] = useState<CowAlert | null>(null)
 
-  if (isLoading || !cow) {
+  if (isLoading || !animal) {
     return (
       <div className="flex flex-1 flex-col gap-6 p-4 md:p-6">
         <Skeleton className="h-10 w-48" />
@@ -75,7 +74,7 @@ export function CowProfile({
       className="flex flex-1 flex-col p-4 md:p-6"
     >
       <CowProfileTopbar
-        cow={cow}
+        animal={animal}
         onBack={onBack}
         onBackUrl={onBackUrl}
         onEdit={() => console.log("Edytuj")}
@@ -85,19 +84,15 @@ export function CowProfile({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr]">
         {/* Lewa kolumna */}
         <div className="flex flex-col gap-4">
-          <CowIdCard cow={cow} />
-          <CowActiveAlerts
-            alerts={cow.activeAlerts}
-            onAlertClick={setSelectedAlert}
-          />
+          <CowIdCard animal={animal} />
+          <CowActiveAlerts alerts={[]} onAlertClick={setSelectedAlert} />
           <CowPedigree
-            sire={cow.sire}
-            dam={cow.dam}
+            animal={animal}
             onCowClick={onCowClick}
             onCowClickUrlBase={onCowClickUrlBase}
           />
           <CowOffspring
-            offspring={cow.offspring}
+            offspring={[]}
             onCowClick={onCowClick}
             onCowClickUrlBase={onCowClickUrlBase}
           />
@@ -105,15 +100,15 @@ export function CowProfile({
 
         {/* Prawa kolumna */}
         <div className="flex flex-col gap-4">
-          <CowYieldChart yieldHistory={cow.yieldHistory} />
+          <CowYieldChart yieldHistory={[]} />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CowActivityChart activityHistory={cow.activityHistory} />
-            <CowBcsDisplay bcs={cow.bcs} />
+            <CowActivityChart activityHistory={[]} />
+            <CowBcsDisplay bcs={3.5} />
           </div>
 
           <CowEventTimeline
-            events={cow.events}
+            events={[]}
             onPlayClip={handlePlayClip}
             onAlertClick={setSelectedAlert}
           />

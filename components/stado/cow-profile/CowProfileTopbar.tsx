@@ -1,10 +1,10 @@
 import Link from "next/link"
 import { ChevronLeft, Pencil, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import type { Cow } from "@/lib/types/stado.types"
+import type { AnimalDetails } from "@/lib/types/stado.types"
 
 interface CowProfileTopbarProps {
-  cow: Cow
+  animal: AnimalDetails
   onBack?: () => void
   onBackUrl?: string
   onEdit: () => void
@@ -26,7 +26,7 @@ function BackButton({ onClick }: BackButtonProps) {
 }
 
 export function CowProfileTopbar({
-  cow,
+  animal,
   onBack,
   onBackUrl,
   onEdit,
@@ -45,8 +45,8 @@ export function CowProfileTopbar({
         <div className="flex items-center text-sm text-muted-foreground">
           <span className="xs:inline hidden">Stado</span>
           <span className="xs:inline mx-2 hidden">›</span>
-          <span className="font-semibold text-slate-900">
-            #{cow.id} {cow.name}
+          <span className="max-w-[150px] truncate font-semibold text-slate-900 sm:max-w-none">
+            {animal.name}
           </span>
         </div>
       </div>

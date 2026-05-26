@@ -1,14 +1,25 @@
-import type { Cow, HerdSummary, FeedEvent, CowYieldDay, Animal, PaginatedResponse } from '@/lib/types/stado.types'
-import { MOCK_COWS, MOCK_FEED, MOCK_SUMMARY } from './stado.mock'
-import apiClient from '@/lib/api-client'
+import type {
+  Animal,
+  AnimalDetails,
+  Cow,
+  CowYieldDay,
+  FeedEvent,
+  HerdSummary,
+  PaginatedResponse,
+} from "@/lib/types/stado.types"
+import { MOCK_COWS, MOCK_FEED, MOCK_SUMMARY } from "./stado.mock"
+import apiClient from "@/lib/api-client"
 
 const BASE = process.env.NEXT_PUBLIC_API_URL
-const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === 'true' || true // Domyślnie true dla developmentu
+const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === "true" || true // Domyślnie true dla developmentu
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string
+  ) {
     super(message)
-    this.name = 'ApiError'
+    this.name = "ApiError"
   }
 }
 
@@ -37,13 +48,22 @@ export async function getAnimals(params: {
     sort: params.sort,
   }
 
-  if (params.search && params.search.trim() !== '') {
+  if (params.search && params.search.trim() !== "") {
     queryParams.search = params.search
   }
 
-  const response = await apiClient.get<PaginatedResponse<Animal>>('/animals', {
+  const response = await apiClient.get<PaginatedResponse<Animal>>("/animals", {
     params: queryParams,
   })
+  return response.data
+}
+
+/**
+ * Pobiera szczegółowe dane pojedynczego zwierzęcia.
+ * GET /api/v1/animals/:id
+ */
+export async function getAnimalDetails(id: string): Promise<AnimalDetails> {
+  const response = await apiClient.get<AnimalDetails>(`/animals/${id}`)
   return response.data
 }
 
@@ -51,9 +71,11 @@ export async function getAnimals(params: {
  * Pobiera podsumowanie stada (liczniki w nagłówku).
  * GET /api/herd/summary
  */
-export async function getHerdSummary(signal?: AbortSignal): Promise<HerdSummary> {
+export async function getHerdSummary(
+  signal?: AbortSignal
+): Promise<HerdSummary> {
   if (USE_MOCKS) return MOCK_SUMMARY
-  
+
   const response = await fetch(`${BASE}/api/herd/summary`, { signal })
   return handleResponse<HerdSummary>(response)
 }
@@ -69,23 +91,24 @@ export async function getCows(
 ): Promise<Cow[]> {
   if (USE_MOCKS) {
     let filtered = [...MOCK_COWS]
-    if (params?.status && params.status !== 'all') {
-      filtered = filtered.filter(c => c.status === params.status)
+    if (params?.status && params.status !== "all") {
+      filtered = filtered.filter((c) => c.status === params.status)
     }
     if (params?.search) {
       const s = params.search.toLowerCase()
-      filtered = filtered.filter(c => 
-        c.name.toLowerCase().includes(s) || 
-        c.earTagNumber.toLowerCase().includes(s)
+      filtered = filtered.filter(
+        (c) =>
+          c.name.toLowerCase().includes(s) ||
+          c.earTagNumber.toLowerCase().includes(s)
       )
     }
     return filtered
   }
 
   const url = new URL(`${BASE}/api/herd/cows`)
-  if (params?.status) url.searchParams.append('status', params.status)
-  if (params?.search) url.searchParams.append('search', params.search)
-  
+  if (params?.status) url.searchParams.append("status", params.status)
+  if (params?.search) url.searchParams.append("search", params.search)
+
   const response = await fetch(url.toString(), { signal })
   return handleResponse<Cow[]>(response)
 }
@@ -94,10 +117,13 @@ export async function getCows(
  * Pobiera pełne dane pojedynczej krowy (profil).
  * GET /api/herd/cows/:id
  */
-export async function getCowById(id: number, signal?: AbortSignal): Promise<Cow> {
+export async function getCowById(
+  id: number,
+  signal?: AbortSignal
+): Promise<Cow> {
   if (USE_MOCKS) {
-    const cow = MOCK_COWS.find(c => c.id === id)
-    if (!cow) throw new ApiError(404, 'Cow not found')
+    const cow = MOCK_COWS.find((c) => c.id === id)
+    if (!cow) throw new ApiError(404, "Cow not found")
     return cow
   }
 
@@ -119,8 +145,8 @@ export async function getHerdFeed(
   }
 
   const url = new URL(`${BASE}/api/herd/events/feed`)
-  if (params?.limit) url.searchParams.append('limit', params.limit.toString())
-  
+  if (params?.limit) url.searchParams.append("limit", params.limit.toString())
+
   const response = await fetch(url.toString(), { signal })
   return handleResponse<FeedEvent[]>(response)
 }
@@ -135,12 +161,15 @@ export async function getCowYieldHistory(
   signal?: AbortSignal
 ): Promise<CowYieldDay[]> {
   if (USE_MOCKS) {
-    const cow = MOCK_COWS.find(c => c.id === cowId)
-    if (!cow) throw new ApiError(404, 'Cow not found')
+    const cow = MOCK_COWS.find((c) => c.id === cowId)
+    if (!cow) throw new ApiError(404, "Cow not found")
     return cow.yieldHistory.slice(-days)
   }
 
-  const response = await fetch(`${BASE}/api/herd/cows/${cowId}/yield?days=${days}`, { signal })
+  const response = await fetch(
+    `${BASE}/api/herd/cows/${cowId}/yield?days=${days}`,
+    { signal }
+  )
   return handleResponse<CowYieldDay[]>(response)
 }
 
@@ -154,13 +183,15 @@ export async function getEventClipUrl(
   signal?: AbortSignal
 ): Promise<{ url: string; expiresAt: string }> {
   if (USE_MOCKS) {
-    return { 
-      url: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', 
-      expiresAt: new Date(Date.now() + 3600000).toISOString() 
+    return {
+      url: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
+      expiresAt: new Date(Date.now() + 3600000).toISOString(),
     }
   }
 
-  const response = await fetch(`${BASE}/api/herd/events/${eventId}/clip`, { signal })
+  const response = await fetch(`${BASE}/api/herd/events/${eventId}/clip`, {
+    signal,
+  })
   return handleResponse<{ url: string; expiresAt: string }>(response)
 }
 
@@ -170,16 +201,21 @@ export async function getEventClipUrl(
  */
 export async function addCow(
   farmId: string,
-  data: { earTagNumber: string; name: string; breed?: string; birthDate?: string }
+  data: {
+    earTagNumber: string
+    name: string
+    breed?: string
+    birthDate?: string
+  }
 ): Promise<Cow> {
-  const token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem("accessToken")
   const response = await fetch(`${BASE}/api/v1/farms/${farmId}/herd/cows`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(data)
-  });
-  return handleResponse<Cow>(response);
+    body: JSON.stringify(data),
+  })
+  return handleResponse<Cow>(response)
 }

@@ -1,26 +1,13 @@
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import type { Cow } from "@/lib/types/stado.types"
+import type { AnimalDetails } from "@/lib/types/stado.types"
 
 interface CowIdCardProps {
-  cow: Cow
+  animal: AnimalDetails
 }
 
-export function CowIdCard({ cow }: CowIdCardProps) {
-  const getBcsColor = (bcs: number) => {
-    if (bcs < 2.5) return "text-destructive"
-    if (bcs < 3.0) return "text-amber-600"
-    if (bcs <= 3.75) return "text-green-600"
-    return "text-amber-600"
-  }
-
-  const getYieldColor = (status: string) => {
-    if (status === "alert") return "text-destructive"
-    if (status === "warn") return "text-amber-600"
-    return "text-green-600"
-  }
-
+export function CowIdCard({ animal }: CowIdCardProps) {
   return (
     <Card
       className="mb-4 gap-0 overflow-hidden p-0 py-0 shadow-none data-[size=sm]:py-0"
@@ -32,61 +19,49 @@ export function CowIdCard({ cow }: CowIdCardProps) {
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-700 text-2xl dark:bg-slate-800">
             🐄
           </div>
-          <div>
-            <h2 className="text-2xl font-bold">
-              #{cow.id} {cow.name}
-            </h2>
-            <p className="font-mono text-sm text-slate-300 dark:text-slate-400">
-              {cow.earTagNumber}
+          <div className="min-w-0">
+            <h2 className="truncate text-2xl font-bold">{animal.name}</h2>
+            <p className="truncate font-mono text-sm text-slate-300 dark:text-slate-400">
+              {animal.earTagNumber || "Brak numeru"}
             </p>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {cow.activeAlerts.length > 0 && (
-            <Badge
-              variant="destructive"
-              className="bg-red-500 hover:bg-red-500"
-            >
-              {cow.activeAlerts.length} aktywne alerty
-            </Badge>
-          )}
-          {cow.status === "dry" && (
+          {animal.bookType && (
             <Badge
               variant="secondary"
               className="border-none bg-slate-600 text-slate-100 hover:bg-slate-600 dark:bg-slate-700"
             >
-              Zasuszenie
+              Księga: {animal.bookType}
             </Badge>
           )}
-          <Badge variant="outline" className="border-slate-600 text-slate-100 dark:border-slate-700">
-            {cow.breed}
-          </Badge>
+          {animal.breed && (
+            <Badge
+              variant="outline"
+              className="border-slate-600 text-slate-100 dark:border-slate-700"
+            >
+              {animal.breed}
+            </Badge>
+          )}
+          {animal.sensorId && (
+            <Badge
+              variant="outline"
+              className="border-slate-600 text-slate-100 dark:border-slate-700"
+            >
+              Sensor: {animal.sensorId}
+            </Badge>
+          )}
         </div>
       </div>
 
       {/* Dolna sekcja */}
-      <div className="space-y-1 p-4 bg-card">
-        <DataField label="Wiek" value={cow.ageLabel} />
-        <DataField
-          label="Laktacja"
-          value={`${cow.lactationNumber}. laktacja`}
-        />
-        <DataField
-          label="Wydajność dziś"
-          value={cow.status === "dry" ? "—" : `${cow.yieldToday} l`}
-          valueClassName={
-            cow.status === "dry"
-              ? ""
-              : cn("font-bold", getYieldColor(cow.status))
-          }
-        />
-        <DataField
-          label="BCS"
-          value={cow.bcs.toFixed(2)}
-          valueClassName={cn("font-bold", getBcsColor(cow.bcs))}
-        />
-        <DataField label="Rasa" value="Holstein-Friesian" />
+      <div className="space-y-1 bg-card p-4">
+        {animal.birthDate && (
+          <DataField label="Data urodzenia" value={animal.birthDate} />
+        )}
+        {animal.breed && <DataField label="Rasa" value={animal.breed} />}
+        <DataField label="ID" value={animal.id.split("-")[0] + "..."} />
       </div>
     </Card>
   )
@@ -102,9 +77,11 @@ function DataField({
   valueClassName?: string
 }) {
   return (
-      <div className="flex justify-between border-b py-2 text-sm last:border-0 border-border/50">
-        <span className="text-muted-foreground">{label}</span>
-        <span className={cn("text-foreground font-medium", valueClassName)}>{value}</span>
-      </div>
+    <div className="flex justify-between border-b border-border/50 py-2 text-sm last:border-0">
+      <span className="text-muted-foreground">{label}</span>
+      <span className={cn("font-medium text-foreground", valueClassName)}>
+        {value}
+      </span>
+    </div>
   )
 }

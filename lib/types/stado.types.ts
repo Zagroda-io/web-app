@@ -1,3 +1,34 @@
+export interface AnimalDetails {
+  id: string
+  name: string
+  birthDate: string | null
+  breed: string | null
+  earTagNumber: string | null
+  bookType: string | null
+  sensorId: string | null
+  father: PedigreeAnimal | null
+  mother: MotherDetails | null
+  ff: PedigreeAnimal | null
+  fm: PedigreeAnimal | null
+}
+
+export interface PedigreeAnimal {
+  name: string | null
+  birthDate: string | null
+  breed: string | null
+  earTagNumber: string | null
+  bookType: string | null
+}
+
+export interface MotherDetails extends PedigreeAnimal {
+  efficiency: string | null
+  lactation: string | null
+  offspring: string | null
+  grandmotherLactations: string | null
+  father: PedigreeAnimal | null
+  mother: PedigreeAnimal | null
+}
+
 export interface Animal {
   id: string
   name: string
