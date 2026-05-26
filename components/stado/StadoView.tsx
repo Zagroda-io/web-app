@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { StadoHeader } from "./StadoHeader"
 import { EventFeed } from "./EventFeed"
 import { CowTable } from "./CowTable"
@@ -9,16 +9,19 @@ import { AlertDetailsSheet } from "./AlertDetailsSheet"
 import { HerdKpiSection } from "./kpi/HerdKpiSection"
 import { UpcomingCalvingsWidget } from "./kpi/UpcomingCalvingsWidget"
 import { mockHerdKpiData } from "@/mocks/herdMocks"
+import { getAnimals } from "@/api/stado"
+import { useUser } from "@/context/UserContext"
 import type {
-  Cow,
+  Animal,
   CowAlert,
   CowStatusFilter,
   FeedEvent,
   HerdSummary,
+  PaginatedResponse,
 } from "@/lib/types/stado.types"
 
 interface StadoViewProps {
-  initialCows: Cow[]
+  initialCows: any // Pozostawiam dla kompatybilności, ale będziemy używać getAnimals
   initialFeed: FeedEvent[]
   summary: HerdSummary
 }
@@ -28,9 +31,48 @@ export default function StadoView({
   initialFeed,
   summary,
 }: StadoViewProps) {
+  const { activeFarm } = useUser()
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<CowStatusFilter>("all")
   const [selectedAlert, setSelectedAlert] = useState<CowAlert | null>(null)
+  
+  const [animalsData, setAnimalsData] = useState<PaginatedResponse<Animal>>()
+  const [isLoading, setIsLoading] = useState(false)
+  const [page, setPage] = useState(0)
+  const [sort, setSort] = useState("name")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+      setPage(0)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  const fetchAnimals = useCallback(async () => {
+    if (!activeFarm?.id) return
+
+    setIsLoading(true)
+    try {
+      const data = await getAnimals({
+        farmId: activeFarm.id,
+        page,
+        size: 20,
+        sort,
+        search: debouncedSearch,
+      })
+      setAnimalsData(data)
+    } catch (error) {
+      console.error("Błąd pobierania zwierząt:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [activeFarm?.id, page, sort, debouncedSearch])
+
+  useEffect(() => {
+    fetchAnimals()
+  }, [fetchAnimals])
 
   const handleEventClick = (event: FeedEvent) => {
     if (event.category === "alert" && event.details) {
@@ -79,9 +121,11 @@ export default function StadoView({
           </div>
 
           <CowTable
-            cows={initialCows}
-            searchQuery={searchQuery}
-            statusFilter={statusFilter}
+            data={animalsData}
+            isLoading={isLoading}
+            onPageChange={setPage}
+            onSortChange={setSort}
+            currentSort={sort}
             onRowClickUrlBase="/dashboard/stado"
           />
         </div>

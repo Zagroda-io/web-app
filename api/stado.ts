@@ -1,5 +1,6 @@
-import type { Cow, HerdSummary, FeedEvent, CowYieldDay } from '@/lib/types/stado.types'
+import type { Cow, HerdSummary, FeedEvent, CowYieldDay, Animal, PaginatedResponse } from '@/lib/types/stado.types'
 import { MOCK_COWS, MOCK_FEED, MOCK_SUMMARY } from './stado.mock'
+import apiClient from '@/lib/api-client'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL
 const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === 'true' || true // Domyślnie true dla developmentu
@@ -16,6 +17,34 @@ async function handleResponse<T>(response: Response): Promise<T> {
     throw new ApiError(response.status, `API Error: ${response.statusText}`)
   }
   return response.json()
+}
+
+/**
+ * Pobiera listę zwierząt dla widoku stado z paginacją, sortowaniem i filtrowaniem.
+ * GET /api/v1/animals
+ */
+export async function getAnimals(params: {
+  farmId: string
+  page?: number
+  size?: number
+  sort?: string
+  search?: string
+}): Promise<PaginatedResponse<Animal>> {
+  const queryParams: Record<string, any> = {
+    farmId: params.farmId,
+    page: params.page,
+    size: params.size,
+    sort: params.sort,
+  }
+
+  if (params.search && params.search.trim() !== '') {
+    queryParams.search = params.search
+  }
+
+  const response = await apiClient.get<PaginatedResponse<Animal>>('/animals', {
+    params: queryParams,
+  })
+  return response.data
 }
 
 /**

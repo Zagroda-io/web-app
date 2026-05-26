@@ -1,3 +1,23 @@
+export interface Animal {
+  id: string
+  name: string
+  birthDate: string
+  breed: string
+  earTagNumber: string
+  bookType: string
+  sensorId: string | null
+}
+
+export interface PaginatedResponse<T> {
+  content: T[]
+  first: boolean
+  last: boolean
+  number: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 export type CowStatus = "alert" | "warn" | "ok" | "dry"
 
 export type AlertSeverity = "red" | "amber" | "green" | "info"
