@@ -26,6 +26,7 @@ import {
   TractorIcon,
   WheatIcon,
 } from "lucide-react"
+import { CreateFarmDialog } from "@/components/farm/CreateFarmDialog"
 
 const getLogo = (type?: string) => {
   switch (type) {
@@ -43,6 +44,7 @@ const getLogo = (type?: string) => {
 export function TeamSwitcher() {
   const { isMobile } = useSidebar()
   const { farms, activeFarm, switchFarm, loading } = useUser()
+  const [showCreateDialog, setShowCreateDialog] = React.useState(false)
 
   if (loading) {
     return (
@@ -66,7 +68,7 @@ export function TeamSwitcher() {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg">
+          <SidebarMenuButton size="lg" onClick={() => setShowCreateDialog(true)}>
             <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
               <PlusIcon className="size-4" />
             </div>
@@ -76,6 +78,10 @@ export function TeamSwitcher() {
             </div>
           </SidebarMenuButton>
         </SidebarMenuItem>
+        <CreateFarmDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+        />
       </SidebarMenu>
     )
   }
@@ -124,7 +130,14 @@ export function TeamSwitcher() {
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
+            <DropdownMenuItem
+              className="gap-2 p-2"
+              onSelect={() => {
+                setTimeout(() => {
+                  setShowCreateDialog(true)
+                }, 0)
+              }}
+            >
               <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                 <PlusIcon className="size-4" />
               </div>
@@ -135,6 +148,10 @@ export function TeamSwitcher() {
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
+      <CreateFarmDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+      />
     </SidebarMenu>
   )
 }

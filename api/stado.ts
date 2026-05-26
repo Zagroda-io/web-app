@@ -134,3 +134,23 @@ export async function getEventClipUrl(
   const response = await fetch(`${BASE}/api/herd/events/${eventId}/clip`, { signal })
   return handleResponse<{ url: string; expiresAt: string }>(response)
 }
+
+/**
+ * Dodaje nową krowę do stada.
+ * POST /api/v1/farms/{farmId}/herd/cows
+ */
+export async function addCow(
+  farmId: string,
+  data: { earTagNumber: string; name: string; breed?: string; birthDate?: string }
+): Promise<Cow> {
+  const token = localStorage.getItem('accessToken');
+  const response = await fetch(`${BASE}/api/v1/farms/${farmId}/herd/cows`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(data)
+  });
+  return handleResponse<Cow>(response);
+}
