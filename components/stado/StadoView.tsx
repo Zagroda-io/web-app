@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { StadoHeader } from "./StadoHeader"
 import { EventFeed } from "./EventFeed"
 import { CowTable } from "./CowTable"
@@ -11,33 +11,40 @@ import { UpcomingCalvingsWidget } from "./kpi/UpcomingCalvingsWidget"
 import { mockHerdKpiData } from "@/mocks/herdMocks"
 import { getAnimals } from "@/api/stado"
 import { useUser } from "@/context/UserContext"
+import { ApiErrorState } from "@/components/shared/ApiErrorState"
 import type {
   Animal,
   CowAlert,
-  CowStatusFilter,
   FeedEvent,
   HerdSummary,
   PaginatedResponse,
 } from "@/lib/types/stado.types"
 
 interface StadoViewProps {
-  initialCows: any // Pozostawiam dla kompatybilności, ale będziemy używać getAnimals
+  initialCows?: unknown
   initialFeed: FeedEvent[]
   summary: HerdSummary
+  summaryError?: boolean
+  feedError?: boolean
+  onRetrySummary?: () => void
+  onRetryFeed?: () => void
 }
 
 export default function StadoView({
-  initialCows,
   initialFeed,
   summary,
+  summaryError,
+  feedError,
+  onRetrySummary,
+  onRetryFeed,
 }: StadoViewProps) {
   const { activeFarm } = useUser()
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<CowStatusFilter>("all")
   const [selectedAlert, setSelectedAlert] = useState<CowAlert | null>(null)
-  
+
   const [animalsData, setAnimalsData] = useState<PaginatedResponse<Animal>>()
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(false)
   const [page, setPage] = useState(0)
   const [sort, setSort] = useState("name")
   const [debouncedSearch, setDebouncedSearch] = useState("")
@@ -54,6 +61,7 @@ export default function StadoView({
     if (!activeFarm?.id) return
 
     setIsLoading(true)
+    setError(false)
     try {
       const data = await getAnimals({
         farmId: activeFarm.id,
@@ -65,6 +73,7 @@ export default function StadoView({
       setAnimalsData(data)
     } catch (error) {
       console.error("Błąd pobierania zwierząt:", error)
+      setError(true)
     } finally {
       setIsLoading(false)
     }
@@ -98,8 +107,10 @@ export default function StadoView({
       >
         <StadoHeader
           summary={summary}
+          error={summaryError}
+          onRetry={onRetrySummary}
           onSearchChange={setSearchQuery}
-          onFilterChange={setStatusFilter}
+          onFilterChange={() => {}}
         />
 
         <div className="space-y-6">
@@ -114,20 +125,29 @@ export default function StadoView({
             <EventFeed
               events={initialFeed}
               activeAlertCount={summary.activeAlertCount}
+              error={feedError}
+              onRetry={onRetryFeed}
               onEventClick={handleEventClick}
               onEventClickUrlBase="/dashboard/stado"
               onShowAll={() => console.log("Pokaż wszystkie zdarzenia")}
             />
           </div>
 
-          <CowTable
-            data={animalsData}
-            isLoading={isLoading}
-            onPageChange={setPage}
-            onSortChange={setSort}
-            currentSort={sort}
-            onRowClickUrlBase="/dashboard/stado"
-          />
+          {error ? (
+            <ApiErrorState
+              message="Nie udało się pobrać listy zwierząt."
+              onRetry={fetchAnimals}
+            />
+          ) : (
+            <CowTable
+              data={animalsData}
+              isLoading={isLoading}
+              onPageChange={setPage}
+              onSortChange={setSort}
+              currentSort={sort}
+              onRowClickUrlBase="/dashboard/stado"
+            />
+          )}
         </div>
       </motion.div>
 

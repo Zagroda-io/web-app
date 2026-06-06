@@ -36,7 +36,7 @@ import { useUser } from "@/context/UserContext"
 
 const farmSchema = z.object({
   name: z.string().min(2, "Nazwa musi mieć co najmniej 2 znaki"),
-  type: z.enum(["livestock", "crops", "mixed", "other"]),
+  type: z.enum(["cattle", "swine", "mixed", "other"]),
   location: z.string().optional(),
   area: z.number().min(0).optional(),
 })
@@ -48,7 +48,10 @@ interface CreateFarmDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function CreateFarmDialog({ open, onOpenChange }: CreateFarmDialogProps) {
+export function CreateFarmDialog({
+  open,
+  onOpenChange,
+}: CreateFarmDialogProps) {
   const { refreshUser } = useUser()
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
@@ -56,7 +59,7 @@ export function CreateFarmDialog({ open, onOpenChange }: CreateFarmDialogProps) 
     resolver: zodResolver(farmSchema),
     defaultValues: {
       name: "",
-      type: "livestock",
+      type: "cattle",
       location: "",
     },
   })
@@ -115,8 +118,8 @@ export function CreateFarmDialog({ open, onOpenChange }: CreateFarmDialogProps) 
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="livestock">Hodowla zwierząt</SelectItem>
-                      <SelectItem value="crops">Uprawa roślin</SelectItem>
+                      <SelectItem value="cattle">Bydło</SelectItem>
+                      <SelectItem value="swine">Trzoda chlewna</SelectItem>
                       <SelectItem value="mixed">Mieszane</SelectItem>
                       <SelectItem value="other">Inne</SelectItem>
                     </SelectContent>

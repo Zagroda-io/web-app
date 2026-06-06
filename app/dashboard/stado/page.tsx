@@ -1,38 +1,98 @@
+"use client"
+
 import StadoView from "@/components/stado/StadoView"
-import { getCows, getHerdFeed, getHerdSummary } from "@/api/stado"
+import { getHerdFeed, getHerdSummary } from "@/api/stado"
+import { useCallback, useEffect, useRef, useState } from "react"
+import type { FeedEvent, HerdSummary } from "@/lib/types/stado.types"
 
-export const dynamic = "force-dynamic"
+export default function StadoPage() {
+  const [data, setData] = useState<{
+    feed: FeedEvent[]
+    summary: HerdSummary
+  } | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [summaryError, setSummaryError] = useState(false)
+  const [feedError, setFeedError] = useState(false)
+  const isInitialMount = useRef(true)
 
-export default async function StadoPage() {
-  // W rzeczywistym środowisku te dane przyjdą z API.
-  // Jeśli API nie jest gotowe, serwer rzuci błąd lub zwróci puste dane.
-  let cows, feed, summary
+  const loadSummary = useCallback(async () => {
+    try {
+      setSummaryError(false)
+      const summary = await getHerdSummary()
+      setData((prev) => ({
+        feed: prev?.feed || [],
+        summary: summary || {
+          totalCows: NaN,
+          activeAlertCount: NaN,
+          plannedInseminationCount: NaN,
+          lastSyncAt: new Date().toISOString(),
+        },
+      }))
+    } catch (err) {
+      console.error("Błąd ładowania podsumowania stada:", err)
+      setSummaryError(true)
+    }
+  }, [])
 
-  try {
-    ;[cows, feed, summary] = await Promise.all([
-      getCows(),
-      getHerdFeed({ limit: 3 }),
-      getHerdSummary(),
-    ])
-  } catch (error) {
-    console.error("Błąd ładowania danych stada:", error)
-    // W środowisku produkcyjnym tu powinien być lepszy UI błędu
+  const loadFeed = useCallback(async () => {
+    try {
+      setFeedError(false)
+      const feed = await getHerdFeed({ limit: 3 })
+      setData((prev) => ({
+        summary: prev?.summary || {
+          totalCows: NaN,
+          activeAlertCount: NaN,
+          plannedInseminationCount: NaN,
+          lastSyncAt: new Date().toISOString(),
+        },
+        feed,
+      }))
+    } catch (err) {
+      console.error("Błąd ładowania feedu stada:", err)
+      setFeedError(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    const loadInitialData = async () => {
+      setIsLoading(true)
+      await Promise.allSettled([loadSummary(), loadFeed()])
+      setIsLoading(false)
+    }
+
+    if (isInitialMount.current) {
+      loadInitialData()
+      isInitialMount.current = false
+    }
+  }, [loadSummary, loadFeed])
+
+  if (isLoading && !data) {
     return (
-      <div className="p-8 text-center">
-        <h2 className="text-xl font-bold text-red-600">
-          Błąd połączenia z API
-        </h2>
-        <p className="mt-2 text-muted-foreground">
-          Nie udało się pobrać danych stada. Sprawdź czy backend działa i czy
-          zmienna NEXT_PUBLIC_API_URL jest poprawna.
-        </p>
+      <div className="flex flex-1 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
       </div>
     )
   }
 
+  const summary = data?.summary || {
+    totalCows: NaN,
+    activeAlertCount: NaN,
+    plannedInseminationCount: NaN,
+    lastSyncAt: new Date().toISOString(),
+  }
+
+  const feed = data?.feed || []
+
   return (
     <div className="flex flex-1 flex-col">
-      <StadoView initialCows={cows} initialFeed={feed} summary={summary} />
+      <StadoView
+        initialFeed={feed}
+        summary={summary}
+        summaryError={summaryError}
+        feedError={feedError}
+        onRetrySummary={loadSummary}
+        onRetryFeed={loadFeed}
+      />
     </div>
   )
 }

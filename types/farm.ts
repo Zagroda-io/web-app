@@ -4,7 +4,7 @@ export interface Farm {
   ownerId: string
   location?: string
   area?: number
-  type?: "livestock" | "crops" | "mixed" | "other"
+  type?: "cattle" | "swine" | "mixed" | "other"
   logoUrl?: string
   createdAt: string
   updatedAt: string

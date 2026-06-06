@@ -1,13 +1,16 @@
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, RefreshCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card } from "@/components/ui/card"
 import { EventFeedItem } from "./EventFeedItem"
 import type { FeedEvent } from "@/lib/types/stado.types"
+import { InlineError } from "../shared/InlineError"
 
 interface EventFeedProps {
   events: FeedEvent[]
   isLoading?: boolean
+  error?: boolean
+  onRetry?: () => void
   onEventClick: (event: FeedEvent) => void
   onEventClickUrlBase?: string
   onShowAll: () => void
@@ -17,6 +20,8 @@ interface EventFeedProps {
 export function EventFeed({
   events,
   isLoading,
+  error,
+  onRetry,
   onEventClick,
   onEventClickUrlBase,
   onShowAll,
@@ -32,22 +37,36 @@ export function EventFeed({
           <span className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
             Ostatnie zdarzenia
           </span>
-          {activeAlertCount > 0 && (
+          {error && <InlineError onRetry={onRetry} />}
+          {!isNaN(activeAlertCount) && activeAlertCount > 0 && (
             <div className="flex items-center gap-1.5 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700 dark:bg-red-950/40 dark:text-red-400">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-600 dark:bg-red-500" />
               {activeAlertCount} aktywne alerty
             </div>
           )}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 text-xs font-medium text-primary hover:bg-primary/5 hover:text-primary"
-          onClick={onShowAll}
-        >
-          Pokaż wszystkie
-          <ChevronRight className="ml-1 h-3.5 w-3.5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          {error && onRetry && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onRetry}
+              className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              title="Odśwież zdarzenia"
+            >
+              <RefreshCcw className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-xs font-medium text-primary hover:bg-primary/5 hover:text-primary"
+            onClick={onShowAll}
+          >
+            Pokaż wszystkie
+            <ChevronRight className="ml-1 h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col">

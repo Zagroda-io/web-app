@@ -1,5 +1,4 @@
 import type {
-  Cow,
   CowActivityDay,
   CowYieldDay,
   FeedEvent,
@@ -12,6 +11,33 @@ export const MOCK_SUMMARY: HerdSummary = {
   plannedInseminationCount: 2,
   lastSyncAt: new Date().toISOString(),
 }
+
+export const YIELD_HISTORY: CowYieldDay[] = [
+  { date: "2024-03-01", liters: 28.5 },
+  { date: "2024-03-02", liters: 29.2 },
+  { date: "2024-03-03", liters: 27.8 },
+  { date: "2024-03-04", liters: 30.1 },
+  { date: "2024-03-05", liters: 31.4 },
+  { date: "2024-03-06", liters: 29.8 },
+  { date: "2024-03-07", liters: 28.9 },
+  { date: "2024-03-08", liters: 30.5 },
+  { date: "2024-03-09", liters: 32.1 },
+  { date: "2024-03-10", liters: 31.8 },
+  { date: "2024-03-11", liters: 30.2 },
+  { date: "2024-03-12", liters: 29.5 },
+  { date: "2024-03-13", liters: 30.8 },
+  { date: "2024-03-14", liters: 31.2 },
+]
+
+export const ACTIVITY_HISTORY: CowActivityDay[] = [
+  { dayLabel: "Pon", activityIndex: 98 },
+  { dayLabel: "Wt", activityIndex: 105 },
+  { dayLabel: "Śr", activityIndex: 112 },
+  { dayLabel: "Cz", activityIndex: 95 },
+  { dayLabel: "Pt", activityIndex: 120 },
+  { dayLabel: "Sb", activityIndex: 102 },
+  { dayLabel: "Nd", activityIndex: 108 },
+]
 
 export const MOCK_FEED: FeedEvent[] = [
   {
@@ -73,132 +99,4 @@ export const MOCK_FEED: FeedEvent[] = [
   },
 ]
 
-const YIELD_HISTORY: CowYieldDay[] = Array.from({ length: 14 }, (_, i) => ({
-  date: new Date(Date.now() - (13 - i) * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split("T")[0],
-  liters: 25 + Math.random() * 10,
-}))
-
-const ACTIVITY_HISTORY: CowActivityDay[] = [
-  { dayLabel: "Pon", activityIndex: 105 },
-  { dayLabel: "Wt", activityIndex: 98 },
-  { dayLabel: "Śr", activityIndex: 210 },
-  { dayLabel: "Czw", activityIndex: 115 },
-  { dayLabel: "Pt", activityIndex: 92 },
-  { dayLabel: "Sob", activityIndex: 101 },
-  { dayLabel: "Ndz", activityIndex: 108 },
-]
-
-export const MOCK_COWS: Cow[] = [
-  {
-    id: 1,
-    earTagNumber: "PL 005312345678",
-    name: "Basia",
-    breed: "HO",
-    birthDate: "2019-03-12",
-    ageLabel: "5 lat 2 m-ce",
-    lactationNumber: 3,
-    status: "alert",
-    yieldToday: 32.5,
-    yieldMax: 45,
-    bcs: 2.25,
-    lastAlertLabel: "Podwyższona temperatura",
-    activeAlerts: [
-      {
-        id: "a1",
-        severity: "red",
-        title: "Podwyższona temperatura",
-        description: "39,8°C wykryte o 06:14. Ryzyko Mastitis.",
-        detectedAt: new Date().toISOString(),
-        details: {
-          metric: "Temperatura ciała",
-          value: "39,8°C (Norma: 38,5-39,2°C)",
-          recommendation:
-            "Odseparowanie od stada, pilna kontrola weterynaryjna, badanie wymienia.",
-          analysis:
-            "Wykryto gwałtowny wzrost temperatury w ciągu ostatnich 2 godzin (+1,2°C). System AI sugeruje wysokie prawdopodobieństwo infekcji.",
-          predictionData: [
-            { label: "Wysoka temperatura", value: 92, color: "bg-red-500" },
-            { label: "Spadek apetytu", value: 45, color: "bg-amber-500" },
-            { label: "Anomalia aktywności", value: 30, color: "bg-amber-500" },
-          ],
-          entities: [
-            {
-              match: 98,
-              type: "Krowa",
-              id: "#034",
-              subType: "Krowa mleczna • Holstein-Fryzyjska",
-            },
-          ],
-        },
-      },
-    ],
-    sire: { identifier: "HOLANDIA-082", name: "Sunny Boy", whIndex: "WH 3121" },
-    dam: { identifier: "PL 005211223344", name: "Bella", note: "Lac. 5" },
-    offspring: [
-      {
-        id: "c1",
-        earTagNumber: "PL 005400112233",
-        sex: "female",
-        birthDate: "2023-01-10",
-        status: "Odchów",
-      },
-    ],
-    yieldHistory: YIELD_HISTORY,
-    activityHistory: ACTIVITY_HISTORY,
-    events: [
-      {
-        id: "ev1",
-        category: "alert",
-        severity: "red",
-        title: "Podwyższona temperatura 39,8°C",
-        description: "Wykryta automatycznie. Oczekuje na ocenę weterynaryjną.",
-        occurredAt: new Date().toISOString(),
-        hasClip: true,
-      },
-    ],
-  },
-  {
-    id: 2,
-    earTagNumber: "PL 005312345679",
-    name: "Krasula",
-    breed: "HO",
-    birthDate: "2020-05-20",
-    ageLabel: "4 lata",
-    lactationNumber: 2,
-    status: "warn",
-    yieldToday: 28.0,
-    yieldMax: 40,
-    bcs: 2.75,
-    lastAlertLabel: "Wykryto ruję",
-    activeAlerts: [],
-    sire: { identifier: "NIEMCY-441", name: "Bullseye" },
-    dam: { identifier: "PL 005211223345", name: "Mućka" },
-    offspring: [],
-    yieldHistory: YIELD_HISTORY,
-    activityHistory: ACTIVITY_HISTORY,
-    events: [],
-  },
-  {
-    id: 3,
-    earTagNumber: "PL 005312345680",
-    name: "Mela",
-    breed: "RW",
-    birthDate: "2021-01-15",
-    ageLabel: "3 lata 4 m-ce",
-    lactationNumber: 1,
-    status: "ok",
-    yieldToday: 24.5,
-    yieldMax: 35,
-    bcs: 3.25,
-    lastAlertLabel: "—",
-    activeAlerts: [],
-    sire: { identifier: "USA-123", name: "Ranger" },
-    dam: { identifier: "PL 005211223346", name: "Mela Senior" },
-    offspring: [],
-    yieldHistory: YIELD_HISTORY,
-    activityHistory: ACTIVITY_HISTORY,
-    events: [],
-  },
-]
+export const MOCK_COWS: any[] = []

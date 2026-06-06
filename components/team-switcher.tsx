@@ -24,16 +24,15 @@ import {
   PlusIcon,
   SproutIcon,
   TractorIcon,
-  WheatIcon,
 } from "lucide-react"
 import { CreateFarmDialog } from "@/components/farm/CreateFarmDialog"
 
 const getLogo = (type?: string) => {
   switch (type) {
-    case "livestock":
+    case "cattle":
       return <BeefIcon className="size-4" />
-    case "crops":
-      return <WheatIcon className="size-4" />
+    case "swine":
+      return <TractorIcon className="size-4" /> // or maybe another icon for pigs?
     case "mixed":
       return <SproutIcon className="size-4" />
     default:
@@ -68,7 +67,10 @@ export function TeamSwitcher() {
     return (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" onClick={() => setShowCreateDialog(true)}>
+          <SidebarMenuButton
+            size="lg"
+            onClick={() => setShowCreateDialog(true)}
+          >
             <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
               <PlusIcon className="size-4" />
             </div>
