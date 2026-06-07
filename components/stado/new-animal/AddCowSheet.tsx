@@ -1,6 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "sonner"
+import { useUser } from "@/context/UserContext"
+import { addCow, type AddCowRequest } from "@/api/stado"
 import {
   Plus,
   ChevronLeft,
@@ -581,9 +584,11 @@ function GrandparentsFields({
 // ─── main ────────────────────────────────────────────────────────────────────
 
 export function AddCowSheet() {
+  const { activeFarm } = useUser()
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
   const [data, setData] = useState<FormData>(EMPTY)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const set = (key: keyof FormData, value: string) =>
     setData((prev) => ({ ...prev, [key]: value }))
@@ -595,10 +600,93 @@ export function AddCowSheet() {
     setOpen(false)
     setStep(0)
     setData(EMPTY)
+    setIsSubmitting(false)
   }
-  const handleSubmit = () => {
-    console.log("Nowa krowa:", data)
-    handleClose()
+
+  const handleSubmit = async () => {
+    if (!activeFarm) {
+      toast.error("Nie wybrano gospodarstwa")
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const request: AddCowRequest = {
+        name: data.name,
+        birthDate: data.birthDate,
+        breed: data.breed,
+        earTagNumber: data.earTag.full || `PL${data.earTag.digits}`,
+        bookType: data.bookType,
+        sensorId: data.sensorId || undefined,
+        mother: data.motherEarTag.digits
+          ? {
+              earTagNumber: data.motherEarTag.full || `PL${data.motherEarTag.digits}`,
+              name: data.motherName || undefined,
+              birthDate: data.motherBirthDate || undefined,
+              bookType: data.motherBookType || undefined,
+              breed: data.motherBreed || undefined,
+              efficiency: data.motherEfficiency || undefined,
+              lactation: data.motherLactation || undefined,
+              offspring: data.motherOffspring || undefined,
+              grandmotherLactations: data.grandmotherLactations || undefined,
+            }
+          : undefined,
+        father: data.fatherEarTag.digits
+          ? {
+              earTagNumber: data.fatherEarTag.full || `PL${data.fatherEarTag.digits}`,
+              name: data.fatherName || undefined,
+              birthDate: data.fatherBirthDate || undefined,
+              bookType: data.fatherBookType || undefined,
+              breed: data.fatherBreed || undefined,
+            }
+          : undefined,
+        motherFather: data.mfEarTag.digits
+          ? {
+              earTagNumber: data.mfEarTag.full || `PL${data.mfEarTag.digits}`,
+              name: data.mfName || undefined,
+              birthDate: data.mfBirthDate || undefined,
+              bookType: data.mfBookType || undefined,
+              breed: data.mfBreed || undefined,
+            }
+          : undefined,
+        motherMother: data.mmEarTag.digits
+          ? {
+              earTagNumber: data.mmEarTag.full || `PL${data.mmEarTag.digits}`,
+              name: data.mmName || undefined,
+              birthDate: data.mmBirthDate || undefined,
+              bookType: data.mmBookType || undefined,
+              breed: data.mmBreed || undefined,
+            }
+          : undefined,
+        fatherFather: data.ffEarTag.digits
+          ? {
+              earTagNumber: data.ffEarTag.full || `PL${data.ffEarTag.digits}`,
+              name: data.ffName || undefined,
+              birthDate: data.ffBirthDate || undefined,
+              bookType: data.ffBookType || undefined,
+              breed: data.ffBreed || undefined,
+            }
+          : undefined,
+        fatherMother: data.fmEarTag.digits
+          ? {
+              earTagNumber: data.fmEarTag.full || `PL${data.fmEarTag.digits}`,
+              name: data.fmName || undefined,
+              birthDate: data.fmBirthDate || undefined,
+              bookType: data.fmBookType || undefined,
+              breed: data.fmBreed || undefined,
+            }
+          : undefined,
+      }
+
+      await addCow(request)
+      toast.success("Krowa została dodana pomyślnie")
+      handleClose()
+    } catch (error) {
+      console.error("Error adding cow:", error)
+      toast.error("Wystąpił błąd podczas dodawania krowy")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isFirstStepValid =
@@ -714,6 +802,7 @@ export function AddCowSheet() {
             variant="outline"
             onClick={step === 0 ? handleClose : () => setStep((s) => s - 1)}
             className="gap-1.5"
+            disabled={isSubmitting}
           >
             {step === 0 ? (
               "Anuluj"
@@ -754,11 +843,21 @@ export function AddCowSheet() {
                 variant="ghost"
                 onClick={handleSubmit}
                 className="gap-1.5 text-muted-foreground"
+                disabled={isSubmitting}
               >
                 Pomiń i zapisz
               </Button>
-              <Button type="button" onClick={handleSubmit} className="gap-1.5">
-                <Check className="h-4 w-4" />
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                className="gap-1.5"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <Check className="h-4 w-4" />
+                )}
                 Zapisz krowę
               </Button>
             </div>

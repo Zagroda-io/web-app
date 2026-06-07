@@ -139,17 +139,66 @@ export async function getEventClipUrl(
  * Dodaje nową krowę do stada.
  * POST /api/v1/farms/{farmId}/herd/cows
  */
-export async function addCow(
-  farmId: string,
-  data: {
-    earTagNumber: string
-    name: string
-    breed?: string
+export interface AddCowRequest {
+  name: string
+  birthDate: string
+  breed: string
+  earTagNumber: string
+  bookType: string
+  sensorId?: string
+  mother?: {
+    earTagNumber?: string
+    name?: string
     birthDate?: string
+    bookType?: string
+    breed?: string
+    efficiency?: string
+    lactation?: string
+    offspring?: string
+    grandmotherLactations?: string
   }
+  father?: {
+    earTagNumber?: string
+    name?: string
+    birthDate?: string
+    bookType?: string
+    breed?: string
+  }
+  motherMother?: {
+    earTagNumber?: string
+    name?: string
+    birthDate?: string
+    bookType?: string
+    breed?: string
+  }
+  motherFather?: {
+    earTagNumber?: string
+    name?: string
+    birthDate?: string
+    bookType?: string
+    breed?: string
+  }
+  fatherMother?: {
+    earTagNumber?: string
+    name?: string
+    birthDate?: string
+    bookType?: string
+    breed?: string
+  }
+  fatherFather?: {
+    earTagNumber?: string
+    name?: string
+    birthDate?: string
+    bookType?: string
+    breed?: string
+  }
+}
+
+export async function addCow(
+  data: AddCowRequest
 ): Promise<Cow> {
   const response = await apiClient.post<Cow>(
-    `/v1/farms/${farmId}/herd/cows`,
+    `/animals`,
     data
   )
   return response.data
