@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Button } from "@/components/ui/button"
 import type { CowStatusFilter, HerdSummary } from "@/lib/types/stado.types"
-import { AddCowSheet } from "./AddCowSheet"
+import { AddCowSheet } from "./new-animal/AddCowSheet"
 import { InlineError } from "../shared/InlineError"
 
 interface StadoHeaderProps {
