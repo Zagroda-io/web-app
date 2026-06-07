@@ -5,6 +5,7 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Check,
   Calendar as CalendarIcon,
 } from "lucide-react"
@@ -32,6 +33,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { Calendar } from "@/components/ui/calendar"
 import { format, parseISO, isValid } from "date-fns"
 import { pl } from "date-fns/locale"
@@ -57,8 +63,8 @@ const BOOK_TYPES = [
 
 const STEPS = [
   { id: 0, label: "Krowa" },
-  { id: 1, label: "Ojciec" },
-  { id: 2, label: "Matka" },
+  { id: 1, label: "Matka" },
+  { id: 2, label: "Ojciec" },
   { id: 3, label: "Dziadkowie" },
 ]
 
@@ -441,48 +447,87 @@ function GrandparentBlock({
   set: (k: keyof FormData, v: string) => void
   setTag: (k: keyof FormData, v: EarTagValue) => void
 }) {
+  const [isOpen, setIsOpen] = useState(false)
   const f = (field: string) =>
     `${prefix}${field[0].toUpperCase() + field.slice(1)}` as keyof FormData
 
+  const earTag = data[earTagKey] as EarTagValue
+  const hasData =
+    earTag.digits.length > 0 ||
+    data[f("name")] ||
+    data[f("birthDate")] ||
+    (prefix === "mm" && data.grandmotherLactations)
+
   return (
-    <div className="space-y-3">
-      <SectionTitle>{title}</SectionTitle>
-      <EarTagInput
-        value={data[earTagKey] as EarTagValue}
-        onChange={(v) => setTag(earTagKey, v)}
-        showDuplicate={false}
-      />
-      <div className="space-y-2">
-        <FieldRow label="Imię">
-          <Input
-            value={data[f("name")] as string}
-            onChange={(e) => set(f("name"), e.target.value)}
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-2">
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          className="flex w-full items-center justify-between p-0 h-auto hover:bg-transparent"
+        >
+          <div className="flex items-center gap-2">
+            <SectionTitle>{title}</SectionTitle>
+            {hasData && !isOpen && (
+              <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full lowercase">
+                Wypełniono
+              </span>
+            )}
+          </div>
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 text-muted-foreground transition-transform duration-200",
+              isOpen && "rotate-180"
+            )}
           />
-        </FieldRow>
-        <FieldRow label="Data urodzenia">
-          <DatePickerField
-            value={data[f("birthDate")] as string}
-            onChange={(v) => set(f("birthDate"), v)}
-          />
-        </FieldRow>
-        <div className="grid grid-cols-2 gap-2">
-          <FieldRow label="Rasa">
-            <BreedSelect
-              id={`${prefix}-breed`}
-              value={data[f("breed")] as string}
-              onChange={(v) => set(f("breed"), v)}
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="space-y-3 pt-1">
+        <EarTagInput
+          value={data[earTagKey] as EarTagValue}
+          onChange={(v) => setTag(earTagKey, v)}
+          showDuplicate={false}
+        />
+        <div className="space-y-2">
+          <FieldRow label="Imię">
+            <Input
+              value={data[f("name")] as string}
+              onChange={(e) => set(f("name"), e.target.value)}
             />
           </FieldRow>
-          <FieldRow label="Typ księgi">
-            <BookTypeSelect
-              id={`${prefix}-book`}
-              value={data[f("bookType")] as string}
-              onChange={(v) => set(f("bookType"), v)}
+          <FieldRow label="Data urodzenia">
+            <DatePickerField
+              value={data[f("birthDate")] as string}
+              onChange={(v) => set(f("birthDate"), v)}
             />
           </FieldRow>
+          <div className="grid grid-cols-2 gap-2">
+            <FieldRow label="Rasa">
+              <BreedSelect
+                id={`${prefix}-breed`}
+                value={data[f("breed")] as string}
+                onChange={(v) => set(f("breed"), v)}
+              />
+            </FieldRow>
+            <FieldRow label="Typ księgi">
+              <BookTypeSelect
+                id={`${prefix}-book`}
+                value={data[f("bookType")] as string}
+                onChange={(v) => set(f("bookType"), v)}
+              />
+            </FieldRow>
+          </div>
+          {prefix === "mm" && (
+            <FieldRow label="Laktacje">
+              <Input
+                placeholder="np. 3 laktacje, 8800 kg"
+                value={data.grandmotherLactations}
+                onChange={(e) => set("grandmotherLactations", e.target.value)}
+              />
+            </FieldRow>
+          )}
         </div>
-      </div>
-    </div>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
 
@@ -496,7 +541,7 @@ function GrandparentsFields({
   setTag: (k: keyof FormData, v: EarTagValue) => void
 }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <GrandparentBlock
         title="Ojciec ojca (FF)"
         prefix="ff"
@@ -529,16 +574,6 @@ function GrandparentsFields({
         set={set}
         setTag={setTag}
       />
-      <div className="space-y-2">
-        <SectionTitle>Laktacje babki (MM)</SectionTitle>
-        <FieldRow label="Laktacje babki">
-          <Input
-            placeholder="np. 3 laktacje, 8800 kg"
-            value={data.grandmotherLactations}
-            onChange={(e) => set("grandmotherLactations", e.target.value)}
-          />
-        </FieldRow>
-      </div>
     </div>
   )
 }
@@ -635,21 +670,6 @@ export function AddCowSheet() {
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {step === 0 && <AnimalFields data={data} set={set} setTag={setTag} />}
           {step === 1 && (
-            <ParentFields
-              prefix="father"
-              earTagKey="fatherEarTag"
-              data={data}
-              set={set}
-              setTag={setTag}
-              labels={{
-                name: "Imię ojca",
-                birth: "Data urodzenia ojca",
-                breed: "Rasa ojca",
-                book: "Typ księgi ojca",
-              }}
-            />
-          )}
-          {step === 2 && (
             <>
               <ParentFields
                 prefix="mother"
@@ -666,6 +686,21 @@ export function AddCowSheet() {
               />
               <MotherExtras data={data} set={set} />
             </>
+          )}
+          {step === 2 && (
+            <ParentFields
+              prefix="father"
+              earTagKey="fatherEarTag"
+              data={data}
+              set={set}
+              setTag={setTag}
+              labels={{
+                name: "Imię ojca",
+                birth: "Data urodzenia ojca",
+                breed: "Rasa ojca",
+                book: "Typ księgi ojca",
+              }}
+            />
           )}
           {step === 3 && (
             <GrandparentsFields data={data} set={set} setTag={setTag} />
