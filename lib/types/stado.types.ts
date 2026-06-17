@@ -1,4 +1,35 @@
-export interface AnimalDetails {
+export type Sex = "FEMALE" | "MALE"
+
+export type AnimalCategory = "CALF" | "HEIFER" | "COW" | "BULL"
+
+export type LactationStatus = "LACTATING" | "DRY" | "NONE"
+
+export type AnimalEventType =
+  | "CALVING"
+  | "DRY_OFF"
+  | "INSEMINATION"
+  | "PREGNANCY_CHECK"
+  | "ESTRUS"
+  | "VET"
+  | "ALERT"
+  | "BCS"
+  | "NOTE"
+
+/** Pola statusowe / wyliczane wspólne dla listy i szczegółów zwierzęcia. */
+export interface AnimalStatusFields {
+  sex: Sex | null
+  category: AnimalCategory | null
+  lactationStatus: LactationStatus | null
+  lactationNumber: number
+  dayInMilk: number | null
+  ageLabel: string | null
+  dryOffSuggested: boolean
+  suggestedDryOffDate: string | null
+  lastCalvingDate: string | null
+  expectedCalvingDate: string | null
+}
+
+export interface AnimalDetails extends AnimalStatusFields {
   id: string
   name: string
   birthDate: string | null
@@ -10,6 +41,20 @@ export interface AnimalDetails {
   mother: MotherDetails | null
   ff: PedigreeAnimal | null
   fm: PedigreeAnimal | null
+}
+
+/** Zdarzenie zwierzęcia zwracane przez backend (AnimalEventDto). */
+export interface AnimalEvent {
+  id: string
+  animalId: string
+  animalName: string | null
+  earTagNumber: string | null
+  type: AnimalEventType
+  title: string | null
+  description: string | null
+  severity: string | null
+  occurredAt: string
+  metadata: string | null
 }
 
 export interface PedigreeAnimal {
@@ -29,7 +74,7 @@ export interface MotherDetails extends PedigreeAnimal {
   mother: PedigreeAnimal | null
 }
 
-export interface Animal {
+export interface Animal extends AnimalStatusFields {
   id: string
   name: string
   birthDate: string
@@ -165,7 +210,7 @@ export type FeedEventCategory =
 
 export interface FeedEvent {
   id: string
-  cowId: number
+  cowId: string
   cowName: string
   earTagShort: string // tylko numer, np. "034"
   severity: AlertSeverity

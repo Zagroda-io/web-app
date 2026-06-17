@@ -8,17 +8,19 @@ import { motion } from "framer-motion"
 import { AlertDetailsSheet } from "./AlertDetailsSheet"
 import { HerdKpiSection } from "./kpi/HerdKpiSection"
 import { UpcomingCalvingsWidget } from "./kpi/UpcomingCalvingsWidget"
-import { mockHerdKpiData } from "@/mocks/herdMocks"
-import { getAnimals } from "@/api/stado"
+import { getAnimals, getHerdKpi } from "@/api/stado"
 import { useUser } from "@/context/UserContext"
 import { ApiErrorState } from "@/components/shared/ApiErrorState"
 import type {
   Animal,
+  AnimalCategory,
   CowAlert,
   FeedEvent,
   HerdSummary,
+  LactationStatus,
   PaginatedResponse,
 } from "@/lib/types/stado.types"
+import type { HerdKpiData } from "@/types/herd.types"
 
 interface StadoViewProps {
   initialCows?: unknown
@@ -28,6 +30,18 @@ interface StadoViewProps {
   feedError?: boolean
   onRetrySummary?: () => void
   onRetryFeed?: () => void
+}
+
+const EMPTY_KPI: HerdKpiData = {
+  herdSize: { total: 0, cows: 0, heifers: 0, calves: 0, bulls: 0 },
+  lactation: { inLactation: 0, inLactationPercentage: 0, dry: 0, avgDim: 0 },
+  reproduction: {
+    pregnant: 0,
+    conceptionRate: 0,
+    waitingForInsemination: 0,
+    overdueCount: 0,
+  },
+  upcomingCalvings: [],
 }
 
 export default function StadoView({
@@ -48,6 +62,27 @@ export default function StadoView({
   const [page, setPage] = useState(0)
   const [sort, setSort] = useState("name")
   const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [category, setCategory] = useState<AnimalCategory | undefined>()
+  const [lactationStatus, setLactationStatus] = useState<
+    LactationStatus | undefined
+  >()
+
+  const [kpi, setKpi] = useState<HerdKpiData>(EMPTY_KPI)
+  const [kpiError, setKpiError] = useState(false)
+
+  const loadKpi = useCallback(async () => {
+    try {
+      setKpiError(false)
+      setKpi(await getHerdKpi())
+    } catch (err) {
+      console.error("Błąd ładowania KPI stada:", err)
+      setKpiError(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadKpi()
+  }, [loadKpi])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -69,6 +104,8 @@ export default function StadoView({
         size: 20,
         sort,
         search: debouncedSearch,
+        category,
+        lactationStatus,
       })
       setAnimalsData(data)
     } catch (error) {
@@ -77,7 +114,7 @@ export default function StadoView({
     } finally {
       setIsLoading(false)
     }
-  }, [activeFarm?.id, page, sort, debouncedSearch])
+  }, [activeFarm?.id, page, sort, debouncedSearch, category, lactationStatus])
 
   useEffect(() => {
     fetchAnimals()
@@ -110,15 +147,24 @@ export default function StadoView({
           error={summaryError}
           onRetry={onRetrySummary}
           onSearchChange={setSearchQuery}
-          onFilterChange={() => {}}
+          category={category}
+          onCategoryChange={(value) => {
+            setCategory(value)
+            setPage(0)
+          }}
+          lactationStatus={lactationStatus}
+          onLactationChange={(value) => {
+            setLactationStatus(value)
+            setPage(0)
+          }}
         />
 
         <div className="space-y-6">
-          <HerdKpiSection data={mockHerdKpiData} />
+          <HerdKpiSection data={kpi} error={kpiError} onRetry={loadKpi} />
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <UpcomingCalvingsWidget
-              data={mockHerdKpiData.upcomingCalvings}
+              data={kpi.upcomingCalvings}
               onShowAll={() => console.log("Pokaż wszystkie porody")}
             />
 

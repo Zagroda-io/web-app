@@ -10,6 +10,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { CategoryBadge, LactationBadge } from "./AnimalBadges"
 import type { Animal, PaginatedResponse } from "@/lib/types/stado.types"
 
 interface CowTableProps {
@@ -61,42 +63,50 @@ export function CowTable({
           <Table>
             <TableHeader className="bg-slate-50/50 dark:bg-muted/20">
               <TableRow className="hover:bg-transparent">
-                <TableHead 
-                  className="cursor-pointer text-[11px] font-semibold tracking-[0.08em] whitespace-nowrap text-[#8A93A2] uppercase"
+                <TableHead
+                  className="cursor-pointer text-[11px] font-semibold tracking-[0.08em] whitespace-nowrap text-muted-foreground uppercase"
                   onClick={() => handleSort("name")}
                 >
                   <div className="flex items-center">
                     Numer / Imię {renderSortIcon("name")}
                   </div>
                 </TableHead>
-                <TableHead 
-                  className="cursor-pointer text-[11px] font-semibold tracking-[0.08em] whitespace-nowrap text-[#8A93A2] uppercase"
+                <TableHead
+                  className="cursor-pointer text-[11px] font-semibold tracking-[0.08em] whitespace-nowrap text-muted-foreground uppercase"
                   onClick={() => handleSort("earTagNumber")}
                 >
                   <div className="flex items-center">
                     Kolczyk {renderSortIcon("earTagNumber")}
                   </div>
                 </TableHead>
-                <TableHead 
-                  className="cursor-pointer text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase"
+                <TableHead className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+                  Kategoria
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer text-[11px] font-semibold tracking-[0.08em] whitespace-nowrap text-muted-foreground uppercase"
+                  onClick={() => handleSort("lactationStatus")}
+                >
+                  <div className="flex items-center">
+                    Status {renderSortIcon("lactationStatus")}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase"
                   onClick={() => handleSort("breed")}
                 >
                   <div className="flex items-center">
                     Rasa {renderSortIcon("breed")}
                   </div>
                 </TableHead>
-                <TableHead 
-                  className="cursor-pointer text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase"
+                <TableHead
+                  className="cursor-pointer text-[11px] font-semibold tracking-[0.08em] whitespace-nowrap text-muted-foreground uppercase"
                   onClick={() => handleSort("birthDate")}
                 >
                   <div className="flex items-center">
-                    Data urodzenia {renderSortIcon("birthDate")}
+                    Wiek {renderSortIcon("birthDate")}
                   </div>
                 </TableHead>
-                <TableHead className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">
-                  Księga
-                </TableHead>
-                <TableHead className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">
+                <TableHead className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                   Sensor
                 </TableHead>
                 <TableHead className="w-4"></TableHead>
@@ -106,7 +116,7 @@ export function CowTable({
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    {Array.from({ length: 7 }).map((_, j) => (
+                    {Array.from({ length: 8 }).map((_, j) => (
                       <TableCell key={j}>
                         <Skeleton className="h-4 w-full" />
                       </TableCell>
@@ -116,7 +126,7 @@ export function CowTable({
               ) : animals.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={8}
                     className="h-24 text-center text-muted-foreground"
                   >
                     Brak zwierząt spełniających kryteria.
@@ -136,16 +146,34 @@ export function CowTable({
                     }}
                   >
                     <TableCell>
-                      <div className="font-mono font-semibold text-slate-900 dark:text-foreground">
-                        {animal.name}
+                      <div className="font-semibold text-foreground">
+                        {animal.name || "—"}
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-xs whitespace-nowrap text-muted-foreground">
                       {animal.earTagNumber}
                     </TableCell>
+                    <TableCell>
+                      <CategoryBadge category={animal.category} />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <LactationBadge status={animal.lactationStatus} />
+                        {animal.dryOffSuggested && (
+                          <Badge
+                            variant="outline"
+                            className="border-amber-300 bg-amber-50 text-[10px] font-medium text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300"
+                            title="Sugerowane zasuszenie"
+                          >
+                            Do zasuszenia
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-sm">{animal.breed}</TableCell>
-                    <TableCell className="text-sm">{animal.birthDate}</TableCell>
-                    <TableCell className="text-sm">{animal.bookType}</TableCell>
+                    <TableCell className="text-sm whitespace-nowrap text-muted-foreground">
+                      {animal.ageLabel || animal.birthDate}
+                    </TableCell>
                     <TableCell className="text-sm">
                       {animal.sensorId || "—"}
                     </TableCell>

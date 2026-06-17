@@ -19,7 +19,7 @@ import { LivenessIndicator } from "@/components/liveness-indicator"
 import { Input } from "@/components/ui/input"
 import { BellIcon, SearchIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getCowById } from "@/api/stado"
+import { getAnimalDetails } from "@/api/stado"
 
 const routeMap: Record<string, string> = {
   dashboard: "Panel główny",
@@ -37,7 +37,7 @@ const user = {
 export function ShellHeader() {
   const pathname = usePathname()
   const pathSegments = pathname.split("/").filter(Boolean)
-  const [cowData, setCowData] = useState<{ id: number; label: string } | null>(
+  const [cowData, setCowData] = useState<{ id: string; label: string } | null>(
     null
   )
 
@@ -48,24 +48,20 @@ export function ShellHeader() {
       pathSegments[1] === "stado"
 
     if (isCowProfile) {
-      const cowId = parseInt(pathSegments[2])
-      if (!isNaN(cowId)) {
-        // Unikamy ponownego pobierania, jeśli już mamy te dane
-        if (cowData?.id === cowId) return
+      const cowId = pathSegments[2]
+      // Unikamy ponownego pobierania, jeśli już mamy te dane
+      if (cowData?.id === cowId) return
 
-        getCowById(cowId)
-          .then((cow) => {
-            if (cow) {
-              setCowData({
-                id: cow.id,
-                label: `${cow.earTagNumber} | ${cow.name}`,
-              })
-            }
-          })
-          .catch((err) => {
-            console.error("Failed to fetch cow data for breadcrumb:", err)
-          })
-      }
+      getAnimalDetails(cowId)
+        .then((cow) => {
+          if (cow) {
+            const label = [cow.earTagNumber, cow.name].filter(Boolean).join(" · ")
+            setCowData({ id: cow.id, label: label || cow.id })
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to fetch cow data for breadcrumb:", err)
+        })
     } else {
       setCowData(null)
     }
@@ -99,7 +95,7 @@ export function ShellHeader() {
                 pathSegments[0] === "dashboard" &&
                 pathSegments[1] === "stado" &&
                 cowData &&
-                cowData.id === parseInt(segment)
+                cowData.id === segment
               ) {
                 label = cowData.label
               }

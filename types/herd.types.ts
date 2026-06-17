@@ -1,6 +1,7 @@
 export interface HerdSize {
   total: number
   cows: number
+  heifers: number
   calves: number
   bulls: number
 }

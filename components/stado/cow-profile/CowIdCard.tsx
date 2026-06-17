@@ -1,6 +1,12 @@
+import { AlertTriangle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import {
+  CategoryBadge,
+  LactationBadge,
+  SEX_LABELS,
+} from "@/components/stado/AnimalBadges"
 import type { AnimalDetails } from "@/lib/types/stado.types"
 
 interface CowIdCardProps {
@@ -55,12 +61,60 @@ export function CowIdCard({ animal }: CowIdCardProps) {
         </div>
       </div>
 
+      {/* Status */}
+      <div className="flex flex-wrap items-center gap-2 border-b bg-muted/30 p-4">
+        <CategoryBadge category={animal.category} />
+        <LactationBadge status={animal.lactationStatus} />
+        {animal.sex && (
+          <Badge variant="outline" className="font-medium text-muted-foreground">
+            {SEX_LABELS[animal.sex]}
+          </Badge>
+        )}
+      </div>
+
+      {/* Sugestia zasuszenia */}
+      {animal.dryOffSuggested && (
+        <div className="flex items-start gap-2 border-b border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          <div className="text-xs leading-relaxed">
+            <span className="font-semibold">Sugerowane zasuszenie.</span>{" "}
+            {animal.suggestedDryOffDate
+              ? `Zalecany termin: ${animal.suggestedDryOffDate.slice(0, 10)}.`
+              : "Krowa przekroczyła próg długości laktacji."}
+          </div>
+        </div>
+      )}
+
       {/* Dolna sekcja */}
       <div className="space-y-1 bg-card p-4">
         {animal.birthDate && (
           <DataField label="Data urodzenia" value={animal.birthDate} />
         )}
-        {animal.breed && <DataField label="Rasa" value={animal.breed} />}
+        {animal.ageLabel && <DataField label="Wiek" value={animal.ageLabel} />}
+        {animal.lactationNumber > 0 && (
+          <DataField
+            label="Numer laktacji"
+            value={String(animal.lactationNumber)}
+          />
+        )}
+        {animal.dayInMilk != null && (
+          <DataField
+            label="Dni laktacji (DIM)"
+            value={String(animal.dayInMilk)}
+          />
+        )}
+        {animal.lastCalvingDate && (
+          <DataField
+            label="Ostatnie wycielenie"
+            value={animal.lastCalvingDate.slice(0, 10)}
+          />
+        )}
+        {animal.expectedCalvingDate && (
+          <DataField
+            label="Przewidywane wycielenie"
+            value={animal.expectedCalvingDate.slice(0, 10)}
+          />
+        )}
         <DataField label="ID" value={animal.id.split("-")[0] + "..."} />
       </div>
     </Card>

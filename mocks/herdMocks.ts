@@ -4,6 +4,7 @@ export const mockHerdKpiData: HerdKpiData = {
   herdSize: {
     total: 142,
     cows: 98,
+    heifers: 0,
     calves: 30,
     bulls: 14,
   },

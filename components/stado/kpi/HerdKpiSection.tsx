@@ -8,29 +8,38 @@ import { HerdSizeWidget } from "./HerdSizeWidget"
 import { LactationWidget } from "./LactationWidget"
 import { ReproductionWidget } from "./ReproductionWidget"
 import { Card, CardContent } from "@/components/ui/card"
+import { InlineError } from "@/components/shared/InlineError"
 
 interface HerdKpiSectionProps {
   data: HerdKpiData
+  error?: boolean
+  onRetry?: () => void
 }
 
-export const HerdKpiSection = ({ data }: HerdKpiSectionProps) => {
+export const HerdKpiSection = ({ data, error, onRetry }: HerdKpiSectionProps) => {
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <InlineError onRetry={onRetry} />
+          Nie udało się pobrać wskaźników stada.
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Łącznie */}
         <Card className="border-gray-100 shadow-none">
           <CardContent className="flex h-full flex-col justify-between p-4">
             <div>
-              <p className="mb-1 text-[12px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">
+              <p className="mb-1 text-[12px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                 Wielkość stada
               </p>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-[28px] leading-none font-semibold tracking-[-0.5px] text-[#131720] tabular-nums">
+                <span className="text-[28px] leading-none font-semibold tracking-[-0.5px] text-foreground tabular-nums">
                   {data.herdSize.total}
                 </span>
-                <span className="text-[13px] font-light text-[#8A93A2]">
+                <span className="text-[13px] font-light text-muted-foreground">
                   szt.
                 </span>
               </div>
@@ -43,14 +52,14 @@ export const HerdKpiSection = ({ data }: HerdKpiSectionProps) => {
         <Card className="border-gray-100 shadow-none">
           <CardContent className="flex h-full flex-col justify-between p-4">
             <div>
-              <p className="mb-1 text-[12px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">
+              <p className="mb-1 text-[12px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                 W laktacji
               </p>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-[28px] leading-none font-semibold tracking-[-0.5px] text-[#131720] tabular-nums">
+                <span className="text-[28px] leading-none font-semibold tracking-[-0.5px] text-foreground tabular-nums">
                   {data.lactation.inLactation}
                 </span>
-                <span className="text-[13px] font-light text-[#8A93A2]">
+                <span className="text-[13px] font-light text-muted-foreground">
                   szt.
                 </span>
                 <span className="ml-0.5 text-sm text-muted-foreground">
@@ -66,14 +75,14 @@ export const HerdKpiSection = ({ data }: HerdKpiSectionProps) => {
         <Card className="border-gray-100 shadow-none">
           <CardContent className="flex h-full flex-col justify-between p-4">
             <div>
-              <p className="mb-1 text-[12px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">
+              <p className="mb-1 text-[12px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                 Zasuszone
               </p>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-[28px] leading-none font-semibold tracking-[-0.5px] text-[#131720] tabular-nums">
+                <span className="text-[28px] leading-none font-semibold tracking-[-0.5px] text-foreground tabular-nums">
                   {data.lactation.dry}
                 </span>
-                <span className="text-[13px] font-light text-[#8A93A2]">
+                <span className="text-[13px] font-light text-muted-foreground">
                   szt.
                 </span>
               </div>
@@ -86,14 +95,14 @@ export const HerdKpiSection = ({ data }: HerdKpiSectionProps) => {
         <Card className="border-gray-100 shadow-none">
           <CardContent className="flex h-full flex-col justify-between p-4">
             <div>
-              <p className="mb-1 text-[12px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase">
+              <p className="mb-1 text-[12px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                 Nadchodzące porody
               </p>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-[28px] leading-none font-semibold tracking-[-0.5px] text-[#131720] tabular-nums">
+                <span className="text-[28px] leading-none font-semibold tracking-[-0.5px] text-foreground tabular-nums">
                   {data.upcomingCalvings.length}
                 </span>
-                <span className="text-[13px] font-light text-[#8A93A2]">
+                <span className="text-[13px] font-light text-muted-foreground">
                   szt.
                 </span>
               </div>

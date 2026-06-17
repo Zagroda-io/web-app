@@ -86,7 +86,7 @@ export function CowPedigree({
 
   return (
     <div className="mb-4 space-y-6">
-      <div className="px-1 text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
+      <div className="px-1 text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase dark:text-muted-foreground/80">
         Rodowód
       </div>
 

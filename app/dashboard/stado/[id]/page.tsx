@@ -55,6 +55,7 @@ export default function CowProfilePage() {
         isLoading={isLoading}
         onBackUrl="/dashboard/stado"
         onCowClickUrlBase="/dashboard/stado"
+        onRefresh={loadData}
       />
     </div>
   )

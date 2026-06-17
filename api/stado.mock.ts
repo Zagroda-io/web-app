@@ -42,7 +42,7 @@ export const ACTIVITY_HISTORY: CowActivityDay[] = [
 export const MOCK_FEED: FeedEvent[] = [
   {
     id: "e1",
-    cowId: 1,
+    cowId: "1",
     cowName: "Basia",
     earTagShort: "034",
     severity: "red",
@@ -75,7 +75,7 @@ export const MOCK_FEED: FeedEvent[] = [
   },
   {
     id: "e2",
-    cowId: 2,
+    cowId: "2",
     cowName: "Krasula",
     earTagShort: "112",
     severity: "amber",
@@ -87,7 +87,7 @@ export const MOCK_FEED: FeedEvent[] = [
   },
   {
     id: "e3",
-    cowId: 3,
+    cowId: "3",
     cowName: "Mela",
     earTagShort: "085",
     severity: "info",

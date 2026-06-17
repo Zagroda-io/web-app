@@ -32,7 +32,7 @@ export function CowEventTimeline({
       size="sm"
     >
       <CardHeader className="flex flex-row items-center justify-between border-b bg-slate-50/50 px-4 py-3 dark:bg-muted/20">
-        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
+        <h3 className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase dark:text-muted-foreground/80">
           Historia zdarzeń
         </h3>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 import { CowProfileTopbar } from "./CowProfileTopbar"
 import { CowIdCard } from "./CowIdCard"
@@ -12,7 +12,9 @@ import { CowEventTimeline } from "./CowEventTimeline"
 import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 import { AlertDetailsSheet } from "../AlertDetailsSheet"
-import type { AnimalDetails, CowAlert } from "@/lib/types/stado.types"
+import { AddEventDialog } from "./AddEventDialog"
+import { getAnimalEvents, mapEventToCowEvent } from "@/api/stado"
+import type { AnimalDetails, CowAlert, CowEvent } from "@/lib/types/stado.types"
 
 const CowYieldChart = dynamic(() => import("./CowYieldChart"), {
   ssr: false,
@@ -30,6 +32,7 @@ interface CowProfileProps {
   onBackUrl?: string
   onCowClick?: (id: number) => void
   onCowClickUrlBase?: string
+  onRefresh?: () => void
 }
 
 export function CowProfile({
@@ -39,8 +42,24 @@ export function CowProfile({
   onBackUrl,
   onCowClick,
   onCowClickUrlBase,
+  onRefresh,
 }: CowProfileProps) {
   const [selectedAlert, setSelectedAlert] = useState<CowAlert | null>(null)
+  const [events, setEvents] = useState<CowEvent[]>([])
+  const [addEventOpen, setAddEventOpen] = useState(false)
+
+  const animalId = animal?.id
+
+  const loadEvents = useCallback(() => {
+    if (!animalId) return
+    getAnimalEvents(animalId)
+      .then((data) => setEvents(data.map(mapEventToCowEvent)))
+      .catch((err) => console.error("Błąd ładowania zdarzeń zwierzęcia:", err))
+  }, [animalId])
+
+  useEffect(() => {
+    loadEvents()
+  }, [loadEvents])
 
   if (isLoading || !animal) {
     return (
@@ -78,7 +97,7 @@ export function CowProfile({
         onBack={onBack}
         onBackUrl={onBackUrl}
         onEdit={() => console.log("Edytuj")}
-        onAddEvent={() => console.log("Dodaj zdarzenie")}
+        onAddEvent={() => setAddEventOpen(true)}
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr]">
@@ -108,7 +127,7 @@ export function CowProfile({
           </div>
 
           <CowEventTimeline
-            events={[]}
+            events={events}
             onPlayClip={handlePlayClip}
             onAlertClick={setSelectedAlert}
           />
@@ -118,6 +137,16 @@ export function CowProfile({
       <AlertDetailsSheet
         alert={selectedAlert}
         onClose={() => setSelectedAlert(null)}
+      />
+
+      <AddEventDialog
+        animalId={animal.id}
+        open={addEventOpen}
+        onOpenChange={setAddEventOpen}
+        onSaved={() => {
+          loadEvents()
+          onRefresh?.()
+        }}
       />
     </motion.div>
   )

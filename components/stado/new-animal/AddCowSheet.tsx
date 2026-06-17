@@ -49,6 +49,7 @@ import {
   EarTagInput,
   type EarTagValue,
 } from "@/components/stado/new-animal/EartagInput"
+import type { Sex } from "@/lib/types/stado.types"
 
 const BREEDS = [
   { value: "HO", label: "HO – Holsztyno-fryzyjska" },
@@ -80,6 +81,7 @@ interface FormData {
   birthDate: string
   breed: string
   bookType: string
+  sex: Sex
   sensorId: string
   // Father
   fatherEarTag: EarTagValue
@@ -127,6 +129,7 @@ const EMPTY: FormData = {
   birthDate: "",
   breed: "HO",
   bookType: "",
+  sex: "FEMALE",
   sensorId: "",
   fatherEarTag: EMPTY_TAG,
   fatherName: "",
@@ -318,6 +321,17 @@ function AnimalFields({
             value={data.breed}
             onChange={(v) => set("breed", v)}
           />
+        </FieldRow>
+        <FieldRow label="Płeć *">
+          <Select value={data.sex} onValueChange={(v) => set("sex", v)}>
+            <SelectTrigger id="sex">
+              <SelectValue placeholder="Wybierz płeć" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="FEMALE">Samica</SelectItem>
+              <SelectItem value="MALE">Samiec</SelectItem>
+            </SelectContent>
+          </Select>
         </FieldRow>
         <FieldRow label="Typ księgi">
           <BookTypeSelect
@@ -617,6 +631,7 @@ export function AddCowSheet() {
         breed: data.breed,
         earTagNumber: data.earTag.full || `PL${data.earTag.digits}`,
         bookType: data.bookType,
+        sex: data.sex,
         sensorId: data.sensorId || undefined,
         mother: data.motherEarTag.digits
           ? {

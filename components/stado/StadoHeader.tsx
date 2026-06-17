@@ -2,7 +2,18 @@ import { RefreshCcw, Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Button } from "@/components/ui/button"
-import type { CowStatusFilter, HerdSummary } from "@/lib/types/stado.types"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import type {
+  AnimalCategory,
+  HerdSummary,
+  LactationStatus,
+} from "@/lib/types/stado.types"
 import { AddCowSheet } from "./new-animal/AddCowSheet"
 import { InlineError } from "../shared/InlineError"
 
@@ -11,47 +22,53 @@ interface StadoHeaderProps {
   error?: boolean
   onRetry?: () => void
   onSearchChange: (value: string) => void
-  onFilterChange: (value: CowStatusFilter) => void
+  category?: AnimalCategory
+  onCategoryChange: (value: AnimalCategory | undefined) => void
+  lactationStatus?: LactationStatus
+  onLactationChange: (value: LactationStatus | undefined) => void
 }
+
+const LACTATION_ALL = "all"
 
 export function StadoHeader({
   summary,
   error,
   onRetry,
   onSearchChange,
-  onFilterChange,
+  category,
+  onCategoryChange,
+  lactationStatus,
+  onLactationChange,
 }: StadoHeaderProps) {
-  const displayValue = (val: number) => (isNaN(val) ? "NaN" : val)
+  const displayValue = (val: number) => (isNaN(val) ? "—" : val)
 
   return (
     <div className="mb-6 flex flex-col gap-4 border-b pb-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
-            <div className="text-[11px] font-semibold tracking-[0.08em] text-[#8A93A2] uppercase dark:text-muted-foreground/80">
+            <div className="text-[11px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
               Podsumowanie stada
             </div>
             {error && <InlineError onRetry={onRetry} />}
           </div>
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold tracking-[-0.3px] text-[#131720] dark:text-foreground">
-              Stado — {displayValue(summary.totalCows)} krów
-            </h1>
-          </div>
+          <h1 className="text-xl font-semibold tracking-[-0.3px] text-foreground">
+            Stado — {displayValue(summary.totalCows)} szt.
+          </h1>
           <p className="text-xs text-muted-foreground">
-            {displayValue(summary.activeAlertCount)} aktywne alerty ·{" "}
-            {displayValue(summary.plannedInseminationCount)} inseminacje
-            zaplanowane
+            {displayValue(summary.activeAlertCount)} aktywnych alertów ·{" "}
+            {displayValue(summary.plannedInseminationCount)} inseminacji
+            zaplanowanych
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2">
             <div className="relative w-full sm:w-64">
               <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Szukaj — numer, imię, kolczyk…"
-                className="bg-white pl-9 dark:bg-input/30"
+                className="bg-background pl-9"
                 onChange={(e) => onSearchChange(e.target.value)}
               />
             </div>
@@ -68,43 +85,46 @@ export function StadoHeader({
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <ToggleGroup
-              type="single"
-              defaultValue="all"
-              onValueChange={(value) =>
-                onFilterChange((value as CowStatusFilter) || "all")
-              }
-              className="justify-start"
-            >
-              <ToggleGroupItem
-                value="all"
-                className="data-[state=on]:bg-slate-100"
-              >
-                Wszystkie
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="alert"
-                className="data-[state=on]:text-destructive-foreground data-[state=on]:bg-destructive"
-              >
-                Alerty
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="warn"
-                className="data-[state=on]:bg-amber-100 data-[state=on]:text-amber-700"
-              >
-                Ostrzeżenia
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="ok"
-                className="data-[state=on]:bg-green-100 data-[state=on]:text-green-700"
-              >
-                OK
-              </ToggleGroupItem>
-            </ToggleGroup>
-            <AddCowSheet />
-          </div>
+          <AddCowSheet />
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <ToggleGroup
+          type="single"
+          value={category ?? "all"}
+          onValueChange={(value) =>
+            onCategoryChange(
+              !value || value === "all" ? undefined : (value as AnimalCategory)
+            )
+          }
+          className="justify-start"
+        >
+          <ToggleGroupItem value="all">Wszystkie</ToggleGroupItem>
+          <ToggleGroupItem value="COW">Krowy</ToggleGroupItem>
+          <ToggleGroupItem value="HEIFER">Jałówki</ToggleGroupItem>
+          <ToggleGroupItem value="CALF">Cielęta</ToggleGroupItem>
+          <ToggleGroupItem value="BULL">Byki</ToggleGroupItem>
+        </ToggleGroup>
+
+        <Select
+          value={lactationStatus ?? LACTATION_ALL}
+          onValueChange={(value) =>
+            onLactationChange(
+              value === LACTATION_ALL ? undefined : (value as LactationStatus)
+            )
+          }
+        >
+          <SelectTrigger className="h-9 w-[190px]">
+            <SelectValue placeholder="Status laktacji" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={LACTATION_ALL}>Wszystkie statusy</SelectItem>
+            <SelectItem value="LACTATING">W laktacji</SelectItem>
+            <SelectItem value="DRY">Zasuszone</SelectItem>
+            <SelectItem value="NONE">Bez laktacji</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   )
