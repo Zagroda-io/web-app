@@ -24,6 +24,12 @@ export interface User {
   name?: string
 }
 
+export interface AuthState {
+  user: User | null
+  accessToken: string | null
+  isAuthenticated: boolean
+}
+
 import { Farm } from "./farm"
 
 export interface UserInfoResponse {

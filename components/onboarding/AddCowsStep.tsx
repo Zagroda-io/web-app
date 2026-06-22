@@ -54,7 +54,17 @@ export const AddCowsStep: React.FC<AddCowsStepProps> = ({ farmId, onComplete }) 
     try {
       // W realnym świecie pewnie byłby endpoint do bulk insert, tutaj robimy w pętli dla uproszczenia
       // lub zakładamy że addCow obsługuje pojedynczą krowę
-      await Promise.all(validCows.map(cow => addCow(farmId, cow)));
+      await Promise.all(
+        validCows.map((cow) =>
+          addCow({
+            name: cow.name,
+            earTagNumber: cow.earTagNumber,
+            birthDate: new Date().toISOString(), // Domyślna data
+            breed: 'HO', // Domyślna rasa
+            bookType: 'A', // Domyślny typ księgi
+          })
+        )
+      );
       toast.success(`Dodano ${validCows.length} krów do stada`);
       onComplete();
     } catch (error) {
