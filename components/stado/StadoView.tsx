@@ -9,12 +9,14 @@ import { AlertDetailsSheet } from "./AlertDetailsSheet"
 import { HerdKpiSection } from "./kpi/HerdKpiSection"
 import { UpcomingCalvingsWidget } from "./kpi/UpcomingCalvingsWidget"
 import { getAnimals, getHerdKpi } from "@/api/stado"
+import { getFarmAlerts } from "@/api/alerts"
 import { useUser } from "@/context/UserContext"
 import { ApiErrorState } from "@/components/shared/ApiErrorState"
 import type {
   Animal,
   AnimalCategory,
   CowAlert,
+  FarmAlert,
   FeedEvent,
   HerdSummary,
   LactationStatus,
@@ -70,6 +72,9 @@ export default function StadoView({
   const [kpi, setKpi] = useState<HerdKpiData>(EMPTY_KPI)
   const [kpiError, setKpiError] = useState(false)
 
+  const [alerts, setAlerts] = useState<FarmAlert[]>([])
+  const [alertsError, setAlertsError] = useState(false)
+
   const loadKpi = useCallback(async () => {
     try {
       setKpiError(false)
@@ -83,6 +88,21 @@ export default function StadoView({
   useEffect(() => {
     loadKpi()
   }, [loadKpi])
+
+  const loadAlerts = useCallback(async () => {
+    try {
+      setAlertsError(false)
+      const page = await getFarmAlerts({ page: 0, size: 5 })
+      setAlerts(page.content)
+    } catch (err) {
+      console.error("Błąd ładowania alertów:", err)
+      setAlertsError(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadAlerts()
+  }, [loadAlerts])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -176,6 +196,10 @@ export default function StadoView({
               onEventClick={handleEventClick}
               onEventClickUrlBase="/dashboard/stado"
               onShowAll={() => console.log("Pokaż wszystkie zdarzenia")}
+              alerts={alerts}
+              alertsError={alertsError}
+              onRetryAlerts={loadAlerts}
+              allAlertsHref="/dashboard/stado/alerty"
             />
           </div>
 

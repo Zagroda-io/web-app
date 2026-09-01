@@ -223,3 +223,20 @@ export interface FeedEvent {
 }
 
 export type CowStatusFilter = "all" | "alert" | "warn" | "ok"
+
+/** Typ alertu z modelu AI (topik farm.<farmKey>.alerts). */
+export type FarmAlertType = "CALVING" | "ESTRUS" | "FALL" | "ANOMALY"
+
+/** Alert AI skonsumowany z Kafki — GET /api/v1/alerts. */
+export interface FarmAlert {
+  alertId: string
+  farmId: string
+  farmKey: string
+  cowId: string | null // na razie brak skojarzenia ze zwierzęciem
+  type: FarmAlertType | string
+  detectedAt: string // ISO datetime
+  confidence: number | null // 0.0–1.0
+  videoRef: string | null
+  hasVideo: boolean // czy istnieje wgrany klip w object storage (alert_videos)
+  receivedAt: string // ISO datetime (zapis w chmurze)
+}

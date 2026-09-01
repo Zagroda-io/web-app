@@ -24,6 +24,7 @@ import { getAnimalDetails } from "@/api/stado"
 const routeMap: Record<string, string> = {
   dashboard: "Panel główny",
   stado: "Stado",
+  alerty: "Alerty",
   ustawienia: "Ustawienia",
   zalatwienia: "Załatwienia",
 }
@@ -45,7 +46,9 @@ export function ShellHeader() {
     const isCowProfile =
       pathSegments.length >= 3 &&
       pathSegments[0] === "dashboard" &&
-      pathSegments[1] === "stado"
+      pathSegments[1] === "stado" &&
+      // segmenty-trasy (np. /stado/alerty) nie są ID krowy — nie pobieramy zwierzęcia
+      !routeMap[pathSegments[2]]
 
     if (isCowProfile) {
       const cowId = pathSegments[2]
