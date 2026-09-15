@@ -1,4 +1,7 @@
-import type { AlertSeverity } from "@/lib/types/stado.types"
+import type {
+  AlertReviewStatus,
+  AlertSeverity,
+} from "@/lib/types/stado.types"
 
 interface AlertTypeMeta {
   label: string
@@ -51,4 +54,40 @@ export function formatConfidence(confidence: number | null): string {
     return "—"
   }
   return `${Math.round(confidence * 100)}%`
+}
+
+interface ReviewStatusMeta {
+  label: string
+  /** Krótki opis dla tooltipa/opisu kolumny — po co ta decyzja jest. */
+  description: string
+  badgeClass: string
+}
+
+/**
+ * Werdykt hodowcy w wersji dla UI. Świadomie neutralne kolory: to etykieta danych
+ * treningowych, a nie waga alertu (tę niesie {@link ALERT_TYPE_META}).
+ */
+export const REVIEW_STATUS_META: Record<AlertReviewStatus, ReviewStatusMeta> = {
+  PENDING: {
+    label: "Do weryfikacji",
+    description: "Alert czeka na potwierdzenie — nie trafia do paczki treningowej",
+    badgeClass:
+      "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-800/40",
+  },
+  CONFIRMED: {
+    label: "Potwierdzony",
+    description: "Prawdziwe wykrycie — materiał wejdzie do paczki jako przykład pozytywny",
+    badgeClass:
+      "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/40",
+  },
+  REJECTED: {
+    label: "Fałszywy alarm",
+    description: "Błędne wykrycie — materiał opisany jako przykład negatywny",
+    badgeClass:
+      "bg-zinc-100 text-zinc-600 border-zinc-200 line-through decoration-1 dark:bg-zinc-900/40 dark:text-zinc-400 dark:border-zinc-800/40",
+  },
+}
+
+export function reviewStatusMeta(status: AlertReviewStatus): ReviewStatusMeta {
+  return REVIEW_STATUS_META[status] ?? REVIEW_STATUS_META.PENDING
 }

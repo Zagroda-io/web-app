@@ -10,19 +10,29 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { getAlertVideoObjectUrl } from "@/api/alerts"
+import { AlertReviewControls } from "./AlertReviewControls"
 import { alertTypeMeta } from "./alert-utils"
 import type { FarmAlert } from "@/lib/types/stado.types"
 
 interface AlertVideoDialogProps {
   alert: FarmAlert | null
   onClose: () => void
+  /** Werdykt wydany pod odtwarzaczem — rodzic aktualizuje listę alertów. */
+  onReviewed?: (alert: FarmAlert) => void
 }
 
 /**
  * Dialog z odtwarzaczem klipu wideo alertu. Pobiera treść z object storage jako blob
  * (z tokenem) i odtwarza w `<video>`. Klip pobierany jest dopiero po otwarciu.
+ *
+ * <p>Werdykt hodowcy jest tuż pod odtwarzaczem — to moment, w którym człowiek faktycznie
+ * widzi nagranie i może ocenić, czy model trafił.</p>
  */
-export function AlertVideoDialog({ alert, onClose }: AlertVideoDialogProps) {
+export function AlertVideoDialog({
+  alert,
+  onClose,
+  onReviewed,
+}: AlertVideoDialogProps) {
   const [url, setUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
@@ -94,6 +104,15 @@ export function AlertVideoDialog({ alert, onClose }: AlertVideoDialogProps) {
             />
           )}
         </div>
+
+        {alert && onReviewed && (
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">
+              Czy model trafił? Werdykt etykietuje ten klip w materiale treningowym.
+            </p>
+            <AlertReviewControls alert={alert} onReviewed={onReviewed} />
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )
