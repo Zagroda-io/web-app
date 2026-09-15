@@ -227,6 +227,12 @@ export type CowStatusFilter = "all" | "alert" | "warn" | "ok"
 /** Typ alertu z modelu AI (topik farm.<farmKey>.alerts). */
 export type FarmAlertType = "CALVING" | "ESTRUS" | "FALL" | "ANOMALY"
 
+/**
+ * Werdykt hodowcy dla alertu — etykieta materiału w zbiorze treningowym modelu vision.
+ * CONFIRMED = prawdziwe wykrycie, REJECTED = fałszywy alarm, PENDING = brak decyzji.
+ */
+export type AlertReviewStatus = "PENDING" | "CONFIRMED" | "REJECTED"
+
 /** Alert AI skonsumowany z Kafki — GET /api/v1/alerts. */
 export interface FarmAlert {
   alertId: string
@@ -239,4 +245,8 @@ export interface FarmAlert {
   videoRef: string | null
   hasVideo: boolean // czy istnieje wgrany klip w object storage (alert_videos)
   receivedAt: string // ISO datetime (zapis w chmurze)
+  reviewStatus: AlertReviewStatus
+  reviewedBy: string | null // id użytkownika, który wydał werdykt
+  reviewedAt: string | null // ISO datetime
+  reviewNote: string | null
 }
