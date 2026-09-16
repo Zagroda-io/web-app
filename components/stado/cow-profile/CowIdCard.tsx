@@ -1,6 +1,12 @@
-import { AlertTriangle } from "lucide-react"
+"use client"
+
+import { useState } from "react"
+import { AlertTriangle, Radio } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { AssignSensorDialog } from "@/components/sensors/AssignSensorDialog"
+import { formatDevEui } from "@/components/sensors/sensor-utils"
 import { cn } from "@/lib/utils"
 import {
   CategoryBadge,
@@ -11,9 +17,13 @@ import type { AnimalDetails } from "@/lib/types/stado.types"
 
 interface CowIdCardProps {
   animal: AnimalDetails
+  /** Po przypisaniu/odłączeniu czujnika — profil przeładowuje dane krowy. */
+  onSensorChanged?: () => void
 }
 
-export function CowIdCard({ animal }: CowIdCardProps) {
+export function CowIdCard({ animal, onSensorChanged }: CowIdCardProps) {
+  const [sensorDialogOpen, setSensorDialogOpen] = useState(false)
+
   return (
     <Card
       className="mb-4 gap-0 overflow-hidden p-0 py-0 shadow-none data-[size=sm]:py-0"
@@ -53,9 +63,10 @@ export function CowIdCard({ animal }: CowIdCardProps) {
           {animal.sensorId && (
             <Badge
               variant="outline"
-              className="border-slate-600 text-slate-100 dark:border-slate-700"
+              className="gap-1 border-slate-600 font-mono text-slate-100 dark:border-slate-700"
             >
-              Sensor: {animal.sensorId}
+              <Radio className="h-3 w-3" />
+              {formatDevEui(animal.sensorId)}
             </Badge>
           )}
         </div>
@@ -83,6 +94,35 @@ export function CowIdCard({ animal }: CowIdCardProps) {
               : "Krowa przekroczyła próg długości laktacji."}
           </div>
         </div>
+      )}
+
+      {/* Czujnik */}
+      <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
+        <div className="min-w-0">
+          <div className="text-xs text-muted-foreground">Czujnik</div>
+          <div className="truncate font-mono text-sm font-medium">
+            {animal.sensorId ? formatDevEui(animal.sensorId) : "Brak czujnika"}
+          </div>
+        </div>
+        {onSensorChanged && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 shrink-0 text-xs"
+            onClick={() => setSensorDialogOpen(true)}
+          >
+            {animal.sensorId ? "Zmień" : "Przypisz"}
+          </Button>
+        )}
+      </div>
+
+      {onSensorChanged && (
+        <AssignSensorDialog
+          animal={animal}
+          open={sensorDialogOpen}
+          onOpenChange={setSensorDialogOpen}
+          onChanged={onSensorChanged}
+        />
       )}
 
       {/* Dolna sekcja */}
