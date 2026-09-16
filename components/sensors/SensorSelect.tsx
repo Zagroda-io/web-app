@@ -9,9 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getFarmSensors } from "@/api/sensors"
+import { getAssignableSensors } from "@/api/sensors"
 import type { FarmSensor } from "@/lib/types/sensor.types"
-import { assignableSensors, formatDevEui } from "./sensor-utils"
+import { formatDevEui } from "./sensor-utils"
 
 /** Radix Select nie przyjmuje pustej wartości opcji — „bez czujnika" ma własny znacznik. */
 const NO_SENSOR = "__none__"
@@ -21,20 +21,26 @@ interface SensorSelectProps {
   /** DevEUI wybranego czujnika albo pusty tekst = bez czujnika. */
   value: string
   onChange: (devEui: string) => void
-  /** Czujnik, który krowa już nosi — zostaje na liście, choć formalnie jest zajęty. */
+  /** Krowa, dla której wybieramy czujnik — backend dołącza wtedy czujnik, który już nosi. */
+  animalId?: string
+  /**
+   * Czujnik, który krowa ma zapisany. Jeśli nie ma go w rejestrze (dane sprzed rejestru),
+   * i tak pokazujemy go jako opcję — inaczej pole udawałoby „Bez czujnika".
+   */
   currentSensorId?: string | null
   disabled?: boolean
 }
 
 /**
- * Wybór czujnika z puli gospodarstwa. Pokazuje wyłącznie czujniki, które da się przypisać
- * (aktywne, zwierzęce, wolne) — backend i tak to waliduje, ale nie ma sensu proponować
- * opcji, która skończy się błędem.
+ * Wybór czujnika z puli gospodarstwa. Listę czujników, które da się przypisać (aktywne,
+ * zwierzęce, wolne), wyznacza backend tymi samymi regułami co przy zapisie — pole nie
+ * proponuje opcji kończącej się błędem.
  */
 export function SensorSelect({
   id,
   value,
   onChange,
+  animalId,
   currentSensorId,
   disabled,
 }: SensorSelectProps) {
@@ -43,7 +49,7 @@ export function SensorSelect({
 
   useEffect(() => {
     let cancelled = false
-    getFarmSensors()
+    getAssignableSensors(animalId)
       .then((data) => {
         if (!cancelled) setSensors(data)
       })
@@ -54,12 +60,18 @@ export function SensorSelect({
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [animalId])
 
-  const options = useMemo(
-    () => (sensors ? assignableSensors(sensors, currentSensorId) : []),
-    [sensors, currentSensorId]
-  )
+  const options = useMemo(() => {
+    if (!sensors) return []
+    const current = currentSensorId?.trim()
+    const listed = sensors.some(
+      (s) => s.devEui.toLowerCase() === current?.toLowerCase()
+    )
+    return current && !listed
+      ? [...sensors, legacyOption(current)]
+      : sensors
+  }, [sensors, currentSensorId])
 
   if (loadFailed) {
     return (
@@ -115,4 +127,21 @@ export function SensorSelect({
       )}
     </div>
   )
+}
+
+/** Opcja dla czujnika zapisanego na krowie, którego nie ma w rejestrze gospodarstwa. */
+function legacyOption(devEui: string): FarmSensor {
+  return {
+    id: `current-${devEui}`,
+    devEui,
+    type: "ANIMAL",
+    model: null,
+    status: "ACTIVE",
+    activatedAt: null,
+    assignedAnimal: null,
+    connectionStatus: null,
+    batteryPct: null,
+    rssi: null,
+    lastSeenAt: null,
+  }
 }

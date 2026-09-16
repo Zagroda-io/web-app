@@ -26,3 +26,43 @@ export interface FarmSensor {
   rssi: number | null
   lastSeenAt: string | null // ISO datetime
 }
+
+/** Filtr przypisania do krowy. */
+export type SensorAssignmentFilter = "ASSIGNED" | "FREE"
+
+/** Filtr stanu; ATTENTION = niska bateria albo brak kontaktu. */
+export type SensorHealthFilter =
+  | "ONLINE"
+  | "WARNING"
+  | "OFFLINE"
+  | "NO_DATA"
+  | "ATTENTION"
+
+export type SensorSort =
+  | "ATTENTION"
+  | "BATTERY"
+  | "LAST_SEEN"
+  | "ANIMAL"
+  | "ACTIVATED"
+  | "DEV_EUI"
+
+/** Podsumowanie całej puli — niezależne od filtrów listy. */
+export interface SensorPoolSummary {
+  total: number
+  assigned: number
+  free: number
+  needsAttention: number
+  noData: number
+}
+
+/** Strona czujników — GET /api/v1/sensors. */
+export interface SensorPage {
+  content: FarmSensor[]
+  number: number
+  size: number
+  totalElements: number
+  totalPages: number
+  first: boolean
+  last: boolean
+  summary: SensorPoolSummary
+}

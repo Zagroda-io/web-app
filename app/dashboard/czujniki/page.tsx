@@ -1,69 +1,130 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
-import Link from "next/link"
-import { BatteryLow, Plus, Radio } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { Plus, Radio, SearchX } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { ApiErrorState } from "@/components/shared/ApiErrorState"
 import { ActivateSensorDialog } from "@/components/sensors/ActivateSensorDialog"
+import { SensorPagination } from "@/components/sensors/SensorPagination"
+import { SensorSearchBox } from "@/components/sensors/SensorSearchBox"
+import { SensorSummaryTiles } from "@/components/sensors/SensorSummaryTiles"
+import { SensorTable } from "@/components/sensors/SensorTable"
 import {
-  connectionMeta,
-  formatDevEui,
-  signalLabel,
-  summarizePool,
-} from "@/components/sensors/sensor-utils"
+  ASSIGNMENT_OPTIONS,
+  DEFAULT_SENSOR_LIST_STATE,
+  HEALTH_OPTIONS,
+  SORT_OPTIONS,
+  applyTile,
+  hasActiveFilters,
+  isTileActive,
+  parseSensorListState,
+  toApiParams,
+  toSearchParams,
+  type SensorListState,
+} from "@/components/sensors/sensor-list-query"
+import { formatDevEui } from "@/components/sensors/sensor-utils"
 import { getFarmSensors } from "@/api/sensors"
 import { cn } from "@/lib/utils"
-import { formatRelativeDate } from "@/lib/utils/date-utils"
-import type { FarmSensor } from "@/lib/types/sensor.types"
+import type { SensorPage } from "@/lib/types/sensor.types"
 
-const TYPE_LABELS: Record<FarmSensor["type"], string> = {
-  ANIMAL: "Zwierzęcy",
-  ENVIRONMENT: "Środowiskowy",
+/** Radix Select nie przyjmuje pustej wartości — „bez filtra" ma własny znacznik. */
+const ANY = "__any__"
+
+export default function CzujnikiPage() {
+  // useSearchParams wymaga granicy Suspense przy renderowaniu po stronie serwera.
+  return (
+    <Suspense fallback={null}>
+      <SensorsView />
+    </Suspense>
+  )
 }
 
 /**
- * Pula czujników gospodarstwa: co jest aktywowane, na której krowie i czy nadaje.
- * Stąd hodowca aktywuje nowo kupiony czujnik; przypisanie do krowy robi w jej profilu
- * albo przy dodawaniu krowy.
+ * Pula czujników gospodarstwa: wyszukiwanie, filtry, sortowanie i paginacja po stronie
+ * serwera; stan listy żyje w adresie strony. Kafelki nad tabelą pokazują całą pulę
+ * i działają jak szybkie filtry.
  */
-export default function CzujnikiPage() {
-  const [sensors, setSensors] = useState<FarmSensor[] | null>(null)
-  const [error, setError] = useState(false)
-  const [activateOpen, setActivateOpen] = useState(false)
-
-  // Stan ustawiamy dopiero w odpowiedzi na zapytanie — nie synchronicznie w efekcie.
-  const loadSensors = useCallback(
-    () =>
-      getFarmSensors().then(setSensors, (err) => {
-        console.error("Błąd ładowania czujników:", err)
-        setError(true)
-      }),
-    []
+function SensorsView() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const queryString = searchParams.toString()
+  const state = useMemo(
+    () => parseSensorListState(new URLSearchParams(queryString)),
+    [queryString]
   )
 
-  useEffect(() => {
-    loadSensors()
-  }, [loadSensors])
+  const [data, setData] = useState<SensorPage | null>(null)
+  const [loadedKey, setLoadedKey] = useState<string | null>(null)
+  const [error, setError] = useState(false)
+  const [reloadToken, setReloadToken] = useState(0)
+  const [searchResetKey, setSearchResetKey] = useState(0)
+  const [activateOpen, setActivateOpen] = useState(false)
 
-  const retry = () => {
-    setError(false)
-    setSensors(null)
-    loadSensors()
+  const update = useCallback(
+    (next: SensorListState) => {
+      const qs = toSearchParams(next).toString()
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+    },
+    [pathname, router]
+  )
+
+  // Pobieranie zależy tylko od stanu listy — nie od tożsamości routera, która może się zmieniać.
+  const updateRef = useRef(update)
+  useEffect(() => {
+    updateRef.current = update
+  }, [update])
+
+  const requestKey = `${toSearchParams(state).toString()}#${reloadToken}`
+  // Poprzednie wyniki zostają na ekranie, dopóki nie przyjdą nowe — bez migania przy pisaniu.
+  const isFetching = loadedKey !== requestKey
+
+  useEffect(() => {
+    let cancelled = false
+    getFarmSensors(toApiParams(state)).then(
+      (page) => {
+        if (cancelled) return
+        setData(page)
+        setError(false)
+        setLoadedKey(requestKey)
+        // Backend oddaje ostatnią istniejącą stronę, gdy prosiliśmy o dalszą — wyrównujemy adres.
+        if (page.number !== state.page) updateRef.current({ ...state, page: page.number })
+      },
+      (err) => {
+        if (cancelled) return
+        console.error("Błąd ładowania czujników:", err)
+        setError(true)
+        setLoadedKey(requestKey)
+      }
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [requestKey, state])
+
+  const onSearch = useCallback(
+    (search: string) => update({ ...state, search, page: 0 }),
+    [state, update]
+  )
+
+  const clearFilters = () => {
+    setSearchResetKey((k) => k + 1)
+    update({ ...DEFAULT_SENSOR_LIST_STATE, sort: state.sort, size: state.size })
   }
 
-  const summary = useMemo(() => summarizePool(sensors ?? []), [sensors])
+  const filtered = hasActiveFilters(state)
+  const poolIsEmpty = data?.summary.total === 0
 
   return (
     <div className="flex flex-1 flex-col gap-4 md:p-6">
@@ -80,176 +141,191 @@ export default function CzujnikiPage() {
         </Button>
       </div>
 
-      {error ? (
+      {error && !data ? (
         <ApiErrorState
           message="Nie udało się pobrać listy czujników."
-          onRetry={retry}
+          onRetry={() => setReloadToken((t) => t + 1)}
         />
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-            <SummaryTile label="Wszystkie" value={summary.total} loading={!sensors} />
-            <SummaryTile label="Na krowach" value={summary.assigned} loading={!sensors} />
-            <SummaryTile label="Wolne" value={summary.free} loading={!sensors} />
-            <SummaryTile
-              label="Wymaga uwagi"
-              value={summary.needsAttention}
-              loading={!sensors}
-              highlight={summary.needsAttention > 0}
-            />
-          </div>
+          <SensorSummaryTiles
+            summary={data?.summary ?? null}
+            isActive={(tile) => isTileActive(state, tile)}
+            onSelect={(tile) => update(applyTile(state, tile))}
+          />
 
-          <Card
-            className="gap-0 overflow-hidden p-0 py-0 shadow-none data-[size=sm]:py-0"
-            size="sm"
-          >
-            {sensors === null ? (
-              <div className="flex flex-col gap-3 p-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-8 w-full" />
-                ))}
-              </div>
-            ) : sensors.length === 0 ? (
-              <EmptyState onActivate={() => setActivateOpen(true)} />
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-slate-50/50 text-[10px] tracking-[0.08em] uppercase dark:bg-muted/20">
-                      <TableHead>Czujnik</TableHead>
-                      <TableHead>Typ</TableHead>
-                      <TableHead>Krowa</TableHead>
-                      <TableHead>Połączenie</TableHead>
-                      <TableHead className="text-right">Bateria</TableHead>
-                      <TableHead>Sygnał</TableHead>
-                      <TableHead className="text-right">Ostatni kontakt</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sensors.map((sensor) => (
-                      <SensorRow key={sensor.id} sensor={sensor} />
+          {poolIsEmpty ? (
+            <Card className="shadow-none" size="sm">
+              <EmptyPool onActivate={() => setActivateOpen(true)} />
+            </Card>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center gap-2">
+                <SensorSearchBox
+                  key={searchResetKey}
+                  initialValue={state.search}
+                  onSearch={onSearch}
+                />
+                <FilterSelect
+                  label="Przypisanie"
+                  allLabel="Wszystkie czujniki"
+                  value={state.assignment}
+                  options={ASSIGNMENT_OPTIONS}
+                  onChange={(assignment) => update({ ...state, assignment, page: 0 })}
+                />
+                <FilterSelect
+                  label="Stan"
+                  allLabel="Każdy stan"
+                  value={state.health}
+                  options={HEALTH_OPTIONS}
+                  onChange={(health) => update({ ...state, health, page: 0 })}
+                />
+                <Select
+                  value={state.sort}
+                  onValueChange={(sort) =>
+                    update({ ...state, sort: sort as SensorListState["sort"], page: 0 })
+                  }
+                >
+                  <SelectTrigger className="h-9 w-full text-xs sm:w-[220px]" aria-label="Sortowanie">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SORT_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value} className="text-xs">
+                        {option.label}
+                      </SelectItem>
                     ))}
-                  </TableBody>
-                </Table>
+                  </SelectContent>
+                </Select>
+                {filtered && (
+                  <Button variant="ghost" size="sm" className="h-9 text-xs" onClick={clearFilters}>
+                    Wyczyść filtry
+                  </Button>
+                )}
               </div>
-            )}
-          </Card>
+
+              {error && data && (
+                <p
+                  role="alert"
+                  className="flex flex-wrap items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-400"
+                >
+                  Nie udało się odświeżyć listy — widzisz poprzednie wyniki.
+                  <button
+                    type="button"
+                    className="font-semibold underline underline-offset-2"
+                    onClick={() => setReloadToken((t) => t + 1)}
+                  >
+                    Spróbuj ponownie
+                  </button>
+                </p>
+              )}
+
+              <Card
+                className="gap-0 overflow-hidden p-0 py-0 shadow-none data-[size=sm]:py-0"
+                size="sm"
+                aria-busy={isFetching}
+              >
+                {!data ? (
+                  <div className="flex flex-col gap-3 p-4">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Skeleton key={i} className="h-9 w-full" />
+                    ))}
+                  </div>
+                ) : data.content.length === 0 ? (
+                  <NoMatches onClear={clearFilters} />
+                ) : (
+                  <div className={cn("transition-opacity", isFetching && "opacity-60")}>
+                    <SensorTable sensors={data.content} />
+                  </div>
+                )}
+                {data && data.totalElements > 0 && (
+                  <SensorPagination
+                    page={data.number}
+                    size={data.size}
+                    totalElements={data.totalElements}
+                    totalPages={data.totalPages}
+                    disabled={isFetching}
+                    onPageChange={(page) => update({ ...state, page })}
+                    onSizeChange={(size) => update({ ...state, size, page: 0 })}
+                  />
+                )}
+              </Card>
+            </>
+          )}
         </>
       )}
 
       <ActivateSensorDialog
         open={activateOpen}
         onOpenChange={setActivateOpen}
-        onActivated={(sensor) =>
-          setSensors((current) => [
-            sensor,
-            ...(current ?? []).filter((s) => s.id !== sensor.id),
-          ])
-        }
+        onActivated={(sensor) => {
+          // Nowy czujnik może nie pasować do bieżących filtrów — odświeżamy listę i kafelki z serwera.
+          setReloadToken((t) => t + 1)
+          if (filtered) {
+            toast.info(`Czujnik ${formatDevEui(sensor.devEui)} dodany — wyczyść filtry, jeśli go nie widzisz.`)
+          }
+        }}
       />
     </div>
   )
 }
 
-function SensorRow({ sensor }: { sensor: FarmSensor }) {
-  const connection = connectionMeta(sensor.connectionStatus)
-  const lowBattery = sensor.batteryPct !== null && sensor.batteryPct < 20
-
-  return (
-    <TableRow>
-      <TableCell>
-        <div className="font-mono text-xs font-semibold">
-          {formatDevEui(sensor.devEui)}
-        </div>
-        {sensor.model && (
-          <div className="text-[11px] text-muted-foreground">{sensor.model}</div>
-        )}
-      </TableCell>
-      <TableCell className="text-xs text-muted-foreground">
-        {TYPE_LABELS[sensor.type] ?? sensor.type}
-      </TableCell>
-      <TableCell className="text-xs">
-        {sensor.assignedAnimal ? (
-          <Link
-            href={`/dashboard/stado/${sensor.assignedAnimal.id}`}
-            className="font-medium hover:underline"
-          >
-            {sensor.assignedAnimal.name}
-            {sensor.assignedAnimal.earTagNumber && (
-              <span className="ml-1 font-mono text-muted-foreground">
-                {sensor.assignedAnimal.earTagNumber}
-              </span>
-            )}
-          </Link>
-        ) : (
-          <span className="text-muted-foreground">
-            {sensor.type === "ANIMAL" ? "Wolny" : "—"}
-          </span>
-        )}
-      </TableCell>
-      <TableCell>
-        <Badge
-          variant="outline"
-          className={cn("gap-1.5 px-1.5 py-0 text-[10px] font-bold uppercase", connection.badgeClass)}
-        >
-          <span className={cn("h-1.5 w-1.5 rounded-full", connection.dotClass)} />
-          {connection.label}
-        </Badge>
-      </TableCell>
-      <TableCell
-        className={cn(
-          "text-right font-mono text-xs",
-          lowBattery && "font-semibold text-amber-700 dark:text-amber-400"
-        )}
-      >
-        <span className="inline-flex items-center gap-1">
-          {lowBattery && <BatteryLow className="h-3.5 w-3.5" />}
-          {sensor.batteryPct !== null ? `${sensor.batteryPct}%` : "—"}
-        </span>
-      </TableCell>
-      <TableCell className="text-xs whitespace-nowrap text-muted-foreground">
-        {signalLabel(sensor.rssi)}
-      </TableCell>
-      <TableCell className="text-right font-mono text-[11px] whitespace-nowrap text-muted-foreground">
-        {sensor.lastSeenAt ? formatRelativeDate(sensor.lastSeenAt) : "—"}
-      </TableCell>
-    </TableRow>
-  )
-}
-
-function SummaryTile({
+function FilterSelect<T extends string>({
   label,
+  allLabel,
   value,
-  loading,
-  highlight,
+  options,
+  onChange,
 }: {
   label: string
-  value: number
-  loading: boolean
-  highlight?: boolean
+  allLabel: string
+  value: T | null
+  options: { value: T; label: string }[]
+  onChange: (value: T | null) => void
 }) {
   return (
-    <Card className="gap-1 px-4 py-3 shadow-none" size="sm">
-      <span className="text-[10px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-        {label}
-      </span>
-      {loading ? (
-        <Skeleton className="h-6 w-10" />
-      ) : (
-        <span
-          className={cn(
-            "text-xl font-semibold tabular-nums",
-            highlight && "text-amber-700 dark:text-amber-400"
-          )}
-        >
-          {value}
-        </span>
-      )}
-    </Card>
+    <Select
+      value={value ?? ANY}
+      onValueChange={(next) => onChange(next === ANY ? null : (next as T))}
+    >
+      <SelectTrigger
+        className={cn("h-9 w-full text-xs sm:w-[170px]", value && "border-foreground/60")}
+        aria-label={label}
+      >
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={ANY} className="text-xs">
+          {allLabel}
+        </SelectItem>
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value} className="text-xs">
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
 
-function EmptyState({ onActivate }: { onActivate: () => void }) {
+function NoMatches({ onClear }: { onClear: () => void }) {
+  return (
+    <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+      <SearchX className="h-6 w-6 text-muted-foreground" />
+      <div className="space-y-1">
+        <p className="text-sm font-medium">Brak czujników pasujących do filtrów</p>
+        <p className="text-xs text-muted-foreground">
+          Sprawdź pisownię albo poszerz wyszukiwanie.
+        </p>
+      </div>
+      <Button variant="outline" size="sm" onClick={onClear}>
+        Wyczyść filtry
+      </Button>
+    </div>
+  )
+}
+
+function EmptyPool({ onActivate }: { onActivate: () => void }) {
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">

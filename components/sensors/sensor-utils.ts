@@ -1,7 +1,4 @@
-import type {
-  FarmSensor,
-  SensorConnectionStatus,
-} from "@/lib/types/sensor.types"
+import type { SensorConnectionStatus } from "@/lib/types/sensor.types"
 
 interface ConnectionMeta {
   label: string
@@ -56,51 +53,10 @@ export function formatDevEui(devEui: string): string {
   return devEui.toUpperCase().match(/.{2}/g)!.join(":")
 }
 
-function sameSensor(a: string | null | undefined, b: string | null | undefined) {
-  return !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase()
-}
-
-/**
- * Czujniki, które można wybrać dla krowy: zwierzęce, aktywne i wolne — plus czujnik,
- * który ta krowa już nosi (żeby formularz edycji pokazywał bieżącą wartość).
- */
-export function assignableSensors(
-  sensors: FarmSensor[],
-  currentSensorId?: string | null
-): FarmSensor[] {
-  return sensors.filter(
-    (sensor) =>
-      sameSensor(sensor.devEui, currentSensorId) ||
-      (sensor.type === "ANIMAL" &&
-        sensor.status === "ACTIVE" &&
-        sensor.assignedAnimal === null)
-  )
-}
-
 /** Poziom sygnału LoRa w słowach — dBm niewiele mówi hodowcy. */
 export function signalLabel(rssi: number | null): string {
   if (rssi === null || rssi === undefined) return "—"
   if (rssi >= -90) return `Dobry (${rssi} dBm)`
   if (rssi >= -110) return `Średni (${rssi} dBm)`
   return `Słaby (${rssi} dBm)`
-}
-
-export interface SensorPoolSummary {
-  total: number
-  assigned: number
-  free: number
-  needsAttention: number
-}
-
-/** Liczniki nad tabelą; „wymaga uwagi" = offline albo niska bateria. */
-export function summarizePool(sensors: FarmSensor[]): SensorPoolSummary {
-  const assigned = sensors.filter((s) => s.assignedAnimal !== null).length
-  return {
-    total: sensors.length,
-    assigned,
-    free: sensors.length - assigned,
-    needsAttention: sensors.filter(
-      (s) => s.connectionStatus === "OFFLINE" || s.connectionStatus === "WARNING"
-    ).length,
-  }
 }

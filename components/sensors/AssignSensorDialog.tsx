@@ -85,6 +85,7 @@ export function AssignSensorDialog({
             id="animal-sensor"
             value={selected}
             onChange={setSelected}
+            animalId={animal.id}
             currentSensorId={animal.sensorId}
             disabled={pending !== null}
           />

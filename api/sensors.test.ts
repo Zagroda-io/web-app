@@ -17,6 +17,7 @@ vi.mock("@/lib/api-client", () => ({
 import {
   activateSensor,
   assignSensorToAnimal,
+  getAssignableSensors,
   getFarmSensors,
   unassignSensorFromAnimal,
 } from "./sensors"
@@ -26,13 +27,39 @@ describe("api/sensors", () => {
     for (const fn of [get, post, patch, del]) fn.mockReset()
   })
 
-  it("pobiera pulę czujników gospodarstwa", async () => {
+  it("pobiera stronę puli bez pustych filtrów", async () => {
+    get.mockResolvedValue({ data: { content: [], totalElements: 0 } })
+
+    await getFarmSensors({ search: "", assignment: undefined, health: "ATTENTION", sort: "BATTERY", page: 1, size: 50 })
+
+    expect(get).toHaveBeenCalledWith("/sensors", {
+      params: { health: "ATTENTION", sort: "BATTERY", page: 1, size: 50 },
+    })
+  })
+
+  it("bez parametrów pyta o domyślną stronę", async () => {
+    get.mockResolvedValue({ data: { content: [] } })
+
+    await getFarmSensors()
+
+    expect(get).toHaveBeenCalledWith("/sensors", { params: {} })
+  })
+
+  it("pobiera czujniki do wyboru dla konkretnej krowy", async () => {
     get.mockResolvedValue({ data: [{ devEui: "0080e115061bf535" }] })
 
-    const sensors = await getFarmSensors()
+    const sensors = await getAssignableSensors("cow-1")
 
-    expect(get).toHaveBeenCalledWith("/sensors")
+    expect(get).toHaveBeenCalledWith("/sensors/assignable", { params: { animalId: "cow-1" } })
     expect(sensors).toHaveLength(1)
+  })
+
+  it("dla nowej krowy nie wysyła animalId", async () => {
+    get.mockResolvedValue({ data: [] })
+
+    await getAssignableSensors()
+
+    expect(get).toHaveBeenCalledWith("/sensors/assignable", { params: {} })
   })
 
   it("aktywuje czujnik danymi z etykiety bez zbędnych spacji", async () => {
