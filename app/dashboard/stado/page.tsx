@@ -1,7 +1,7 @@
 "use client"
 
 import StadoView from "@/components/stado/StadoView"
-import { getHerdFeed, getHerdSummary } from "@/api/stado"
+import { getHerdFeed, getHerdSummary } from "@/lib/api/stado"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { FeedEvent, HerdSummary } from "@/lib/types/stado.types"
 

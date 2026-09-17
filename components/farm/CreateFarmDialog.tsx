@@ -31,7 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { userService } from "@/api/user-service"
+import { userService } from "@/lib/api/user-service"
 import { useUser } from "@/context/UserContext"
 
 const farmSchema = z.object({

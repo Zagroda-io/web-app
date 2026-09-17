@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/popover"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { fetchHardwareStatus } from "@/api/hardware/liveness"
+import { fetchHardwareStatus } from "@/lib/api/hardware/liveness"
 import { DeviceStatus, HardwareSummary } from "@/types/hardware"
 import { formatRelativeDate } from "@/lib/utils/date-utils"
 import { cn } from "@/lib/utils"

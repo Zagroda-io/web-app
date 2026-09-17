@@ -18,6 +18,7 @@ import {
   LayoutDashboardIcon,
   MapIcon,
   PieChartIcon,
+  RadioIcon,
   Settings2Icon,
   SproutIcon,
   TractorIcon,
@@ -59,6 +60,11 @@ const data = {
       title: "Stado",
       url: "/dashboard/stado",
       icon: <BeefIcon />,
+    },
+    {
+      title: "Czujniki",
+      url: "/dashboard/czujniki",
+      icon: <RadioIcon />,
     },
     {
       title: "Uprawy",

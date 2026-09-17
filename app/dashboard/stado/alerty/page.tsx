@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
-import { getFarmAlerts } from "@/api/alerts"
+import { getFarmAlerts } from "@/lib/api/alerts"
 import { ApiErrorState } from "@/components/shared/ApiErrorState"
 import { AlertVideoDialog } from "@/components/stado/AlertVideoDialog"
 import { AlertDatasetButton } from "@/components/stado/AlertDatasetButton"
@@ -147,27 +147,21 @@ export default function AlertyPage() {
         />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <Tabs
-          value={filter}
-          onValueChange={(value) => {
-            setFilter(value as ReviewFilter)
-            setPage(0)
-          }}
-        >
-          <TabsList>
-            {REVIEW_FILTERS.map((option) => (
-              <TabsTrigger key={option.value} value={option.value}>
-                {option.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-        <p className="text-[11px] text-muted-foreground">
-          Potwierdzone alerty zasilają materiał do douczania modelu — paczkę z ich
-          klipami pobierzesz przyciskiem &bdquo;Pobierz materiał (ZIP)&rdquo;.
-        </p>
-      </div>
+      <Tabs
+        value={filter}
+        onValueChange={(value) => {
+          setFilter(value as ReviewFilter)
+          setPage(0)
+        }}
+      >
+        <TabsList>
+          {REVIEW_FILTERS.map((option) => (
+            <TabsTrigger key={option.value} value={option.value}>
+              {option.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {error ? (
         <ApiErrorState

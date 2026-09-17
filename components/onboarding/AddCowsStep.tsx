@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { addCow } from '@/api/stado';
+import { addCow } from '@/lib/api/stado';
 import { toast } from 'sonner';
 import { PlusIcon, Trash2Icon } from 'lucide-react';
 

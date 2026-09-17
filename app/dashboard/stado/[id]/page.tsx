@@ -1,6 +1,6 @@
 "use client"
 
-import { getAnimalDetails } from "@/api/stado"
+import { getAnimalDetails } from "@/lib/api/stado"
 import { CowProfile } from "@/components/stado/cow-profile/CowProfile"
 import { ApiErrorState } from "@/components/shared/ApiErrorState"
 import { notFound, useParams } from "next/navigation"

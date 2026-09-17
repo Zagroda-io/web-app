@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 import { AlertDetailsSheet } from "../AlertDetailsSheet"
 import { AddEventDialog } from "./AddEventDialog"
-import { getAnimalEvents, mapEventToCowEvent } from "@/api/stado"
+import { getAnimalEvents, mapEventToCowEvent } from "@/lib/api/stado"
 import type { AnimalDetails, CowAlert, CowEvent } from "@/lib/types/stado.types"
 
 const CowYieldChart = dynamic(() => import("./CowYieldChart"), {
@@ -103,7 +103,7 @@ export function CowProfile({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[300px_1fr]">
         {/* Lewa kolumna */}
         <div className="flex flex-col gap-4">
-          <CowIdCard animal={animal} />
+          <CowIdCard animal={animal} onSensorChanged={onRefresh} />
           <CowActiveAlerts alerts={[]} onAlertClick={setSelectedAlert} />
           <CowPedigree
             animal={animal}
