@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getAssignableSensors } from "@/api/sensors"
+import { getAssignableSensors } from "@/lib/api/sensors"
 import type { FarmSensor } from "@/lib/types/sensor.types"
 import { formatDevEui } from "./sensor-utils"
 

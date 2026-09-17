@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { getAlertVideoObjectUrl } from "@/api/alerts"
+import { getAlertVideoObjectUrl } from "@/lib/api/alerts"
 import { AlertReviewControls } from "./AlertReviewControls"
 import { alertTypeMeta } from "./alert-utils"
 import type { FarmAlert } from "@/lib/types/stado.types"

@@ -7,7 +7,7 @@ import React, {
   useEffect,
   useState,
 } from "react"
-import { userService } from "@/api/user-service"
+import { userService } from "@/lib/api/user-service"
 import { Farm } from "@/types/farm"
 
 interface UserContextType {

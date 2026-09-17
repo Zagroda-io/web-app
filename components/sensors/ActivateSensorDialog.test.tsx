@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 const activateSensor = vi.fn()
 const success = vi.fn()
 
-vi.mock("@/api/sensors", () => ({
+vi.mock("@/lib/api/sensors", () => ({
   activateSensor: (...args: unknown[]) => activateSensor(...args),
 }))
 vi.mock("sonner", () => ({

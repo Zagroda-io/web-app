@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { motion } from "framer-motion"
 import { AlertDetailsSheet } from "../AlertDetailsSheet"
 import { AddEventDialog } from "./AddEventDialog"
-import { getAnimalEvents, mapEventToCowEvent } from "@/api/stado"
+import { getAnimalEvents, mapEventToCowEvent } from "@/lib/api/stado"
 import type { AnimalDetails, CowAlert, CowEvent } from "@/lib/types/stado.types"
 
 const CowYieldChart = dynamic(() => import("./CowYieldChart"), {

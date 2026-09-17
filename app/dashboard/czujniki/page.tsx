@@ -34,7 +34,7 @@ import {
   type SensorListState,
 } from "@/components/sensors/sensor-list-query"
 import { formatDevEui } from "@/components/sensors/sensor-utils"
-import { getFarmSensors } from "@/api/sensors"
+import { getFarmSensors } from "@/lib/api/sensors"
 import { cn } from "@/lib/utils"
 import type { SensorPage } from "@/lib/types/sensor.types"
 

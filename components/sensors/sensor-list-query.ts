@@ -3,7 +3,7 @@ import type {
   SensorHealthFilter,
   SensorSort,
 } from "@/lib/types/sensor.types"
-import type { SensorListParams } from "@/api/sensors"
+import type { SensorListParams } from "@/lib/api/sensors"
 
 /**
  * Stan listy czujników trzymany w adresie strony — odświeżenie strony i link wysłany

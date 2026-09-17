@@ -19,7 +19,7 @@ import { LivenessIndicator } from "@/components/liveness-indicator"
 import { Input } from "@/components/ui/input"
 import { BellIcon, SearchIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { getAnimalDetails } from "@/api/stado"
+import { getAnimalDetails } from "@/lib/api/stado"
 
 const routeMap: Record<string, string> = {
   dashboard: "Panel główny",

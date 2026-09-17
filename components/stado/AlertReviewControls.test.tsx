@@ -5,7 +5,7 @@ const reviewFarmAlert = vi.fn()
 const success = vi.fn()
 const error = vi.fn()
 
-vi.mock("@/api/alerts", () => ({
+vi.mock("@/lib/api/alerts", () => ({
   reviewFarmAlert: (...args: unknown[]) => reviewFarmAlert(...args),
 }))
 

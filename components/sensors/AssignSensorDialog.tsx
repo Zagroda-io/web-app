@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { assignSensorToAnimal, unassignSensorFromAnimal } from "@/api/sensors"
+import { assignSensorToAnimal, unassignSensorFromAnimal } from "@/lib/api/sensors"
 import { apiErrorMessage } from "@/lib/api-error"
 import { SensorSelect } from "./SensorSelect"
 import { formatDevEui } from "./sensor-utils"

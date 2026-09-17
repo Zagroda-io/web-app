@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { reviewFarmAlert } from "@/api/alerts"
+import { reviewFarmAlert } from "@/lib/api/alerts"
 import { reviewStatusMeta } from "./alert-utils"
 import type { AlertReviewStatus, FarmAlert } from "@/lib/types/stado.types"
 

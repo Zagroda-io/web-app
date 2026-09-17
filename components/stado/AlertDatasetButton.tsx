@@ -9,7 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { downloadAlertDataset, saveBlobAsFile } from "@/api/alerts"
+import { downloadAlertDataset, saveBlobAsFile } from "@/lib/api/alerts"
 import type { AlertReviewStatus } from "@/lib/types/stado.types"
 
 interface AlertDatasetButtonProps {

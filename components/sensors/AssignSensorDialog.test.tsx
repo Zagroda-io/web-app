@@ -5,7 +5,7 @@ const assignSensorToAnimal = vi.fn()
 const unassignSensorFromAnimal = vi.fn()
 const toastError = vi.fn()
 
-vi.mock("@/api/sensors", () => ({
+vi.mock("@/lib/api/sensors", () => ({
   assignSensorToAnimal: (...args: unknown[]) => assignSensorToAnimal(...args),
   unassignSensorFromAnimal: (...args: unknown[]) => unassignSensorFromAnimal(...args),
 }))

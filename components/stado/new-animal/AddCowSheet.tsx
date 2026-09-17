@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { toast } from "sonner"
 import { useUser } from "@/context/UserContext"
-import { addCow, type AddCowRequest } from "@/api/stado"
+import { addCow, type AddCowRequest } from "@/lib/api/stado"
 import {
   Plus,
   ChevronLeft,

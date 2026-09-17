@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
-import { addAnimalEvent } from "@/api/stado"
+import { addAnimalEvent } from "@/lib/api/stado"
 import type { AnimalEventType } from "@/lib/types/stado.types"
 
 interface AddEventDialogProps {

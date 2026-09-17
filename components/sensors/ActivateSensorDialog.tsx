@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { activateSensor } from "@/api/sensors"
+import { activateSensor } from "@/lib/api/sensors"
 import { apiErrorMessage } from "@/lib/api-error"
 import type { FarmSensor } from "@/lib/types/sensor.types"
 import { formatDevEui } from "./sensor-utils"

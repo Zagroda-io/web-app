@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/dashboard/czujniki",
   useSearchParams: () => new URLSearchParams(currentQuery),
 }))
-vi.mock("@/api/sensors", () => ({
+vi.mock("@/lib/api/sensors", () => ({
   getFarmSensors: (...args: unknown[]) => getFarmSensors(...args),
   activateSensor: vi.fn(),
 }))
