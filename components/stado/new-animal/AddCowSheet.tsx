@@ -599,7 +599,13 @@ function GrandparentsFields({
 
 // ─── main ────────────────────────────────────────────────────────────────────
 
-export function AddCowSheet() {
+interface AddCowSheetProps {
+  /** Wywoływane po zapisaniu krowy — np. odświeżenie listy stada. */
+  onAdded?: () => void
+  triggerClassName?: string
+}
+
+export function AddCowSheet({ onAdded, triggerClassName }: AddCowSheetProps = {}) {
   const { activeFarm } = useUser()
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
@@ -697,6 +703,7 @@ export function AddCowSheet() {
 
       await addCow(request)
       toast.success("Krowa została dodana pomyślnie")
+      onAdded?.()
       handleClose()
     } catch (error) {
       console.error("Error adding cow:", error)
@@ -719,7 +726,7 @@ export function AddCowSheet() {
       }}
     >
       <SheetTrigger asChild>
-        <Button className="gap-2">
+        <Button className={cn("gap-2", triggerClassName)}>
           <Plus className="h-4 w-4" />
           Dodaj krowę
         </Button>
