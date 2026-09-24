@@ -1,62 +1,34 @@
 "use client"
 
-import { getAnimalDetails } from "@/lib/api/stado"
-import { CowProfile } from "@/components/stado/cow-profile/CowProfile"
+import { useParams } from "next/navigation"
 import { ApiErrorState } from "@/components/shared/ApiErrorState"
-import { notFound, useParams } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
-import type { AnimalDetails } from "@/lib/types/stado.types"
+import { CowProfile } from "@/components/stado/cow-profile/CowProfile"
+import { CowProfileSkeleton } from "@/components/stado/cow-profile/CowProfileSkeleton"
+import { useAnimalDetails } from "@/hooks/use-herd"
 
 export default function CowProfilePage() {
   const params = useParams()
   const cowId = params.id as string
+  const animal = useAnimalDetails(cowId)
 
-  const [animal, setAnimal] = useState<AnimalDetails | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<boolean>(false)
-
-  const loadData = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const data = await getAnimalDetails(cowId)
-      setAnimal(data)
-      setError(false)
-    } catch (err) {
-      console.error("Błąd ładowania danych zwierzęcia:", err)
-      setError(true)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [cowId])
-
-  useEffect(() => {
-    if (cowId) {
-      loadData()
-    }
-  }, [cowId, loadData])
-
-  if (error) {
+  if (animal.error && !animal.isLoading) {
     return (
       <ApiErrorState
         message="Nie udało się pobrać danych zwierzęcia."
-        onRetry={loadData}
+        onRetry={animal.reload}
       />
     )
   }
-
-  if (!isLoading && !animal) {
-    notFound()
+  // Dane poprzedniej krowy zostają w hooku do czasu nadejścia nowych — nie pokazujemy ich pod cudzym adresem.
+  if (!animal.data || animal.data.id !== cowId) {
+    return <CowProfileSkeleton />
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      <CowProfile
-        animal={animal}
-        isLoading={isLoading}
-        onBackUrl="/dashboard/stado"
-        onCowClickUrlBase="/dashboard/stado"
-        onRefresh={loadData}
-      />
-    </div>
+    <CowProfile
+      animal={animal.data}
+      backHref="/dashboard/stado"
+      onRefresh={animal.reload}
+    />
   )
 }

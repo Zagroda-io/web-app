@@ -40,6 +40,41 @@
     --color-background: var(--background);
     --color-header: var(--header);
     --color-sidebar-inset: var(--sidebar-inset);
+    --font-mono: var(--font-mono);
+
+    /*
+     * Tony semantyczne Zagrody — jedno źródło kolorów statusów (alert, ruja, laktacja…).
+     * Każdy ton ma: kropkę/akcent (DEFAULT), tekst (-fg), tło (-soft) i obramowanie (-line).
+     * Komponenty sięgają po nie przez lib/theme/tone.ts, nigdy przez surowe kolory Tailwinda.
+     */
+    --color-tone-critical: var(--tone-critical);
+    --color-tone-critical-fg: var(--tone-critical-fg);
+    --color-tone-critical-soft: var(--tone-critical-soft);
+    --color-tone-critical-line: var(--tone-critical-line);
+    --color-tone-warning: var(--tone-warning);
+    --color-tone-warning-fg: var(--tone-warning-fg);
+    --color-tone-warning-soft: var(--tone-warning-soft);
+    --color-tone-warning-line: var(--tone-warning-line);
+    --color-tone-success: var(--tone-success);
+    --color-tone-success-fg: var(--tone-success-fg);
+    --color-tone-success-soft: var(--tone-success-soft);
+    --color-tone-success-line: var(--tone-success-line);
+    --color-tone-info: var(--tone-info);
+    --color-tone-info-fg: var(--tone-info-fg);
+    --color-tone-info-soft: var(--tone-info-soft);
+    --color-tone-info-line: var(--tone-info-line);
+    --color-tone-accent: var(--tone-accent);
+    --color-tone-accent-fg: var(--tone-accent-fg);
+    --color-tone-accent-soft: var(--tone-accent-soft);
+    --color-tone-accent-line: var(--tone-accent-line);
+    --color-tone-neutral: var(--tone-neutral);
+    --color-tone-neutral-fg: var(--tone-neutral-fg);
+    --color-tone-neutral-soft: var(--tone-neutral-soft);
+    --color-tone-neutral-line: var(--tone-neutral-line);
+    --color-surface-hover: var(--surface-hover);
+
+    --animate-status-pulse: status-pulse 1.6s ease-in-out infinite;
+    --animate-rise-in: rise-in 0.2s ease-out;
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -49,6 +84,27 @@
     --radius-4xl: calc(var(--radius) * 2.6);
     --animate-collapsible-down: collapsible-down 0.2s ease-out;
     --animate-collapsible-up: collapsible-up 0.2s ease-out;
+
+    @keyframes status-pulse {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.35;
+        }
+    }
+
+    @keyframes rise-in {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
 
     @keyframes collapsible-down {
         from {
@@ -105,6 +161,32 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+
+    --surface-hover: rgb(248 248 248);
+    --tone-critical: #dc2626;
+    --tone-critical-fg: #b91c1c;
+    --tone-critical-soft: #fef2f2;
+    --tone-critical-line: #fecaca;
+    --tone-warning: #f59e0b;
+    --tone-warning-fg: #b45309;
+    --tone-warning-soft: #fffbeb;
+    --tone-warning-line: #fde68a;
+    --tone-success: #22c55e;
+    --tone-success-fg: #047857;
+    --tone-success-soft: #ecfdf5;
+    --tone-success-line: #a7f3d0;
+    --tone-info: #0284c7;
+    --tone-info-fg: #0369a1;
+    --tone-info-soft: #f0f9ff;
+    --tone-info-line: #bae6fd;
+    --tone-accent: #7c3aed;
+    --tone-accent-fg: #6d28d9;
+    --tone-accent-soft: #f5f3ff;
+    --tone-accent-line: #ddd6fe;
+    --tone-neutral: #cbd5e1;
+    --tone-neutral-fg: #334155;
+    --tone-neutral-soft: #f1f5f9;
+    --tone-neutral-line: #e2e8f0;
 }
 
 .dark {
@@ -141,6 +223,32 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+
+    --surface-hover: rgb(255 255 255 / 4%);
+    --tone-critical: #ef4444;
+    --tone-critical-fg: #fca5a5;
+    --tone-critical-soft: rgb(239 68 68 / 12%);
+    --tone-critical-line: rgb(239 68 68 / 30%);
+    --tone-warning: #f59e0b;
+    --tone-warning-fg: #fcd34d;
+    --tone-warning-soft: rgb(245 158 11 / 12%);
+    --tone-warning-line: rgb(245 158 11 / 30%);
+    --tone-success: #22c55e;
+    --tone-success-fg: #6ee7b7;
+    --tone-success-soft: rgb(16 185 129 / 12%);
+    --tone-success-line: rgb(16 185 129 / 30%);
+    --tone-info: #38bdf8;
+    --tone-info-fg: #7dd3fc;
+    --tone-info-soft: rgb(14 165 233 / 12%);
+    --tone-info-line: rgb(14 165 233 / 30%);
+    --tone-accent: #a78bfa;
+    --tone-accent-fg: #c4b5fd;
+    --tone-accent-soft: rgb(139 92 246 / 14%);
+    --tone-accent-line: rgb(139 92 246 / 32%);
+    --tone-neutral: #64748b;
+    --tone-neutral-fg: #cbd5e1;
+    --tone-neutral-soft: rgb(148 163 184 / 12%);
+    --tone-neutral-line: rgb(148 163 184 / 25%);
 }
 
 @layer base {
