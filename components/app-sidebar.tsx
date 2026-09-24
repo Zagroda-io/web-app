@@ -65,6 +65,16 @@ const data = {
       title: "Czujniki",
       url: "/dashboard/czujniki",
       icon: <RadioIcon />,
+      items: [
+        {
+          title: "Lista czujników",
+          url: "/dashboard/czujniki",
+        },
+        {
+          title: "Alerty",
+          url: "/dashboard/czujniki/alerty",
+        },
+      ],
     },
     {
       title: "Uprawy",

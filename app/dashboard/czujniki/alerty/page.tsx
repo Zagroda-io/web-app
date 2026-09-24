@@ -1,8 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import Link from "next/link"
-import { ArrowLeft, ChevronLeft, ChevronRight, Play } from "lucide-react"
+import { ChevronLeft, ChevronRight, Play } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -10,13 +9,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { getFarmAlerts } from "@/lib/api/alerts"
 import { ApiErrorState } from "@/components/shared/ApiErrorState"
-import { AlertVideoDialog } from "@/components/stado/AlertVideoDialog"
-import { AlertDatasetButton } from "@/components/stado/AlertDatasetButton"
-import { AlertReviewControls } from "@/components/stado/AlertReviewControls"
+import { AlertVideoDialog } from "@/components/alerts/AlertVideoDialog"
+import { AlertDatasetButton } from "@/components/alerts/AlertDatasetButton"
+import { AlertReviewControls } from "@/components/alerts/AlertReviewControls"
 import {
   alertTypeMeta,
   formatConfidence,
-} from "@/components/stado/alert-utils"
+} from "@/components/alerts/alert-utils"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type {
   AlertReviewStatus,
@@ -126,20 +125,13 @@ export default function AlertyPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 md:p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-            <Link href="/dashboard/stado" title="Wróć do widoku Stado">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-lg font-semibold">Alerty</h1>
-            <p className="text-xs text-muted-foreground">
-              Zdarzenia wykryte przez modele AI (topik farm.&lt;klucz&gt;.alerts)
-              {data && ` · ${data.totalElements} łącznie`}
-            </p>
-          </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold">Alerty</h1>
+          <p className="text-xs text-muted-foreground">
+            Zdarzenia wykryte przez modele AI (topik farm.&lt;klucz&gt;.alerts)
+            {data && ` · ${data.totalElements} łącznie`}
+          </p>
         </div>
         <AlertDatasetButton
           reviewStatus={datasetStatus}
