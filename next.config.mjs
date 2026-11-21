@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Samodzielny serwer (.next/standalone) z tylko potrzebnymi zależnościami — z niego powstaje obraz Dockera.
+  output: "standalone",
   async redirects() {
     return [
       // Lista alertów przeniesiona ze Stada pod Czujniki. Bez przekierowania stary adres

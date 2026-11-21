@@ -1,4 +1,5 @@
 import { DM_Mono, DM_Sans } from "next/font/google"
+import Script from "next/script"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -44,6 +45,8 @@ export default function RootLayout({
       )}
     >
       <body className="font-sans">
+        {/* Adres API z kontenera (lib/config.ts) — musi być gotowy przed kodem aplikacji. */}
+        <Script src="/runtime-config.js" strategy="beforeInteractive" />
         <AuthProvider>
           <AlertProvider>
             <ThemeProvider>

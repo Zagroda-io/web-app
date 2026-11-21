@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.github
+.idea
+.claude
+devops
+coverage
+*.tsbuildinfo
+next-env.d.ts
+.env*
+.DS_Store
+Dockerfile

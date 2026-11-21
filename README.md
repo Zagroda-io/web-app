@@ -19,3 +19,14 @@ To use the components in your app, import them as follows:
 ```tsx
 import { Button } from "@/components/ui/button";
 ```
+
+## CI/CD
+
+- **BPPR** (`.github/workflows/bppr.yml`) — każdy PR do `main`: lint, typy, testy, build. Lokalnie to samo:
+  `npm run lint && npm run typecheck && npm test && npm run build`.
+- **Budowanie obrazu Docker** (`.github/workflows/image.yml`) — obraz do Artifact Registry w GCP: automatycznie z `main`,
+  ręcznie z `release/…` (wydanie `vX.Y.Z`) albo z dowolnego brancha/commita (build dev).
+- **Wdrożenie** — job `Application_Deployer-Zagroda_WebApp` w Jenkinsie: DEV z tagu, brancha albo commita, PROD tylko z tagu.
+
+Adres API podaje się przy starcie kontenera (`API_URL`), nie przy buildzie — opis w `lib/config.ts`.
+Szczegóły i konfiguracja: [`devops/jenkins/README.md`](devops/jenkins/README.md).

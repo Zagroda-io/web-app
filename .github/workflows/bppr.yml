@@ -1,0 +1,56 @@
+# BPPR — sprawdzenie kodu przed merge'em do main: lint, typy, testy i build Next.js. Bez obrazu Dockera.
+#
+#  - pull request do main (z feature/…, claude/… itd.) — wymagany status check „BPPR” w regułach brancha main;
+#  - wywoływany też przez „Budowanie obrazu Docker” przed obrazem z main i przed wydaniem (workflow_call).
+# PR z main do release/** go nie uruchamia — ten kod przeszedł już BPPR w drodze do main (patrz release-pr.yml).
+name: BPPR
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_call:
+    inputs:
+      ref:
+        description: Commit do sprawdzenia
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bppr-${{ github.event.pull_request.number || inputs.ref }}
+  # Nowy push do PR przerywa poprzednie sprawdzenie. Wywołanie z workflow obrazu czeka — tam przerwanie wywróciłoby build.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  bppr:
+    name: BPPR
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.event.pull_request.head.sha }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          cache: npm
+
+      - name: Zależności
+        run: npm ci --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typy
+        run: npm run typecheck
+
+      - name: Testy
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
