@@ -1,5 +1,3 @@
-# Zagroda web-app: Next.js jako samodzielny serwer (output: "standalone" w next.config.mjs).
-# Obraz nie zależy od środowiska — adres API podaje się przy starcie kontenera (API_URL, opis w lib/config.ts).
 FROM node:26-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
