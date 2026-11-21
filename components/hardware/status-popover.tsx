@@ -153,7 +153,7 @@ export function HardwareStatusPopover({
               className="rounded-none border-b-2 border-transparent px-4 py-2 data-[state=active]:border-primary data-[state=active]:bg-transparent"
             >
               <Server className="mr-2 h-4 w-4" />
-              Edge
+              Zagroda Box
             </TabsTrigger>
           </TabsList>
 
@@ -193,7 +193,7 @@ export function HardwareStatusPopover({
                       </div>
                       {data.cameras.devices.length === 0
                         ? emptyState(
-                            "Edge nie zgłosił jeszcze żadnej kamery w telemetrii."
+                            "Zagroda Box nie zgłosił jeszcze żadnej kamery."
                           )
                         : (
                           <div className="space-y-3">
@@ -238,7 +238,7 @@ export function HardwareStatusPopover({
                       </div>
                       {data.sensors.devices.length === 0
                         ? emptyState(
-                            "Edge nie zgłosił jeszcze żadnej obroży w telemetrii."
+                            "Zagroda Box nie zgłosił jeszcze żadnej obroży."
                           )
                         : (
                           <>
@@ -298,7 +298,7 @@ export function HardwareStatusPopover({
                   {activeTab === "edge" &&
                     (!data.edgeServer ? (
                       emptyState(
-                        "To gospodarstwo nie przysłało jeszcze telemetrii serwera edge."
+                        "Zagroda Box tego gospodarstwa jeszcze się nie odezwał."
                       )
                     ) : (
                       <div className="m-0 mt-0 outline-none">
@@ -310,7 +310,7 @@ export function HardwareStatusPopover({
                               </div>
                               <div>
                                 <p className="text-sm leading-none font-bold tracking-tight text-foreground">
-                                  Serwer edge
+                                  Zagroda Box
                                 </p>
                                 <p className="mt-1 text-[10px] text-muted-foreground uppercase">
                                   {data.edgeServer.appVersion

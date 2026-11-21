@@ -35,8 +35,8 @@ function describeHealth(hardware: HardwareSummary): string {
   const { status, offlineDevices, warningDevices } = hardware.overall
 
   if (status === "offline") {
-    // Edge jest bramą do wszystkiego — gdy milczy, o kamerach i obrożach nic nie wiemy.
-    return "Brak łączności z serwerem edge"
+    // Zagroda Box (edge) jest bramą do wszystkiego — gdy milczy, o kamerach i obrożach nic nie wiemy.
+    return "Brak łączności z Zagroda Box"
   }
   if (offlineDevices > 0) {
     const noun = pluralPl(offlineDevices, "urządzenie", "urządzenia", "urządzeń")

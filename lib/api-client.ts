@@ -25,9 +25,14 @@ apiClient.interceptors.request.use(
 
 // Interceptor do obsługi odświeżania tokena
 let isRefreshing = false
-let failedQueue: any[] = []
+type PendingRequest = {
+  resolve: (token: string | null) => void
+  reject: (error: unknown) => void
+}
 
-const processQueue = (error: any, token: string | null = null) => {
+let failedQueue: PendingRequest[] = []
+
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error)
@@ -45,7 +50,7 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
+        return new Promise<string | null>((resolve, reject) => {
           failedQueue.push({ resolve, reject })
         })
           .then((token) => {

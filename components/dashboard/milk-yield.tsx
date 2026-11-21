@@ -25,7 +25,6 @@ export function MilkYieldCard({
   className,
 }: MilkYieldProps) {
   const isPositive = difference >= 0
-
   return (
     <Card
       className={cn(
@@ -57,7 +56,12 @@ export function MilkYieldCard({
           <div className="mb-2 flex flex-col">
             {currentYield > 0 ? (
               <div className="flex items-center gap-1.5">
-                <span className="flex items-center gap-0.5 text-[12px] font-medium text-emerald-400">
+                <span
+                  className={cn(
+                    "flex items-center gap-0.5 text-[12px] font-medium",
+                    isPositive ? "text-emerald-400" : "text-amber-400"
+                  )}
+                >
                   <svg
                     width="11"
                     height="11"
@@ -65,10 +69,14 @@ export function MilkYieldCard({
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
+                    aria-hidden="true"
                   >
-                    <polyline points="2,9 6,3 10,9" />
+                    <polyline
+                      points={isPositive ? "2,9 6,3 10,9" : "2,3 6,9 10,3"}
+                    />
                   </svg>
-                  +{difference} l
+                  {isPositive ? "+" : "−"}
+                  {Math.abs(difference)} l
                 </span>
                 <span className="text-[11px] text-slate-500">vs wczoraj</span>
               </div>

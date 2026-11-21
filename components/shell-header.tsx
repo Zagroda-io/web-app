@@ -66,9 +66,8 @@ export function ShellHeader() {
         .catch((err) => {
           console.error("Failed to fetch cow data for breadcrumb:", err)
         })
-    } else {
-      setCowData(null)
     }
+    // Dane krowy spoza profilu zostają w stanie, ale okruszki używają ich tylko dla pasującego ID.
   }, [pathSegments, cowData?.id])
 
   return (

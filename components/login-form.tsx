@@ -1,3 +1,5 @@
+import { isAxiosError } from "axios"
+import { apiErrorMessage } from "@/lib/api-error"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -58,11 +60,15 @@ export function LoginForm({
       })
 
       toast.success("Zalogowano pomyślnie!")
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const status = isAxiosError(error) ? error.response?.status : undefined
       const message =
-        error.response?.status === 401
+        status === 401
           ? "Błędny email lub hasło"
-          : "Wystąpił błąd podczas logowania"
+          : status === 403
+            ? // Nieaktywne konto — core-api podaje powód w polu `detail`.
+              apiErrorMessage(error, "Konto nie jest aktywne")
+            : "Wystąpił błąd podczas logowania"
 
       toast.error(message)
     } finally {
