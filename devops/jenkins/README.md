@@ -87,10 +87,17 @@ gcloud iam service-accounts add-iam-policy-binding "github-image-push@$PROJECT_I
 
 ### Jenkins
 
-1. **Poświadczenie `zagroda-web-app`** (Username with password) — odczyt repo `web-app` (job pobiera nim historię i tagi).
-2. **Job:** New Item → Pipeline, nazwa `Application_Deployer-Zagroda_WebApp`, Pipeline script from SCM, repo
-   `https://github.com/Zagroda-io/web-app.git`, poświadczenie `zagroda-web-app`, branch `*/main`, Script Path
-   `devops/jenkins/deploy.jenkinsfile`. Raz **Build Now** — wczyta parametry.
+**Job:** New Item → Pipeline, nazwa `Application_Deployer-Zagroda_WebApp`, Pipeline script from SCM, repo
+`https://github.com/Zagroda-io/web-app.git`, Credentials **- none -** (repo jest na razie publiczne), branch `*/main`,
+Script Path `devops/jenkins/deploy.jenkinsfile`. Raz **Build Now** — wczyta parametry.
+
+**Gdy repo stanie się prywatne:**
+
+1. **Manage Jenkins → Credentials → Add Credentials**, Kind **Username with password**, ID `zagroda-web-app` —
+   użytkownik GitHuba i fine-grained token z **Contents: Read-only** do repo `web-app`.
+2. W `deploy.jenkinsfile` ustaw `GIT_CREDENTIALS = 'zagroda-web-app'` (jedna linia na początku pliku).
+3. W konfiguracji joba (**Configure → Pipeline → SCM → Credentials**) wybierz `zagroda-web-app` — tym Jenkins pobiera
+   sam Jenkinsfile.
 
 ### Domena i Caddy
 

@@ -10,8 +10,6 @@
 
 SUMMARY = []
 
-// Środowisko. `alias` to nazwa w sieci zagroda-network, na którą wskazuje Caddy
-// (common/devops/configuration/production/Caddyfile); `apiUrl` trafia do kontenera jako API_URL (lib/config.ts).
 PROD = [
     container: 'zagroda-web-app',
     alias    : 'web-app',
@@ -19,13 +17,29 @@ PROD = [
     url      : 'https://app.zagroda.io',
 ]
 
+GIT_CREDENTIALS = ''
+
+def fetchHistory() {
+    def fetch = {
+        sh '''#!/bin/bash
+            set -euo pipefail
+            if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --quiet --unshallow; fi
+            git fetch --quiet --prune --prune-tags --tags --force origin '+refs/heads/*:refs/remotes/origin/*'
+        '''
+    }
+    if (GIT_CREDENTIALS) {
+        withCredentials([gitUsernamePassword(credentialsId: GIT_CREDENTIALS)]) { fetch() }
+    } else {
+        fetch()
+    }
+}
+
 @NonCPS
 def marker(String log, String name) {
     def m = log =~ /(?m)^::${name}::(.*)$/
     return m.find() ? m.group(1).trim() : ''
 }
 
-// Pole z JSON-a, np. /api/health ({"status":"UP","version":"1.0.0","commit":"…"}).
 @NonCPS
 def jsonField(String json, String name) {
     def m = json =~ /"${name}"\s*:\s*"([^"]*)"/
@@ -58,7 +72,6 @@ pipeline {
     }
 
     environment {
-        GIT_CREDENTIALS = 'zagroda-web-app' // poświadczenie GitHuba, którym job pobiera repo
         NETWORK = 'zagroda-network'
     }
 
@@ -73,14 +86,7 @@ pipeline {
                     env.VERSION = params.TAG.startsWith('v') ? params.TAG.substring(1) : params.TAG
                     env.TARGET_TAG = env.VERSION
 
-                    // Pełna historia i tagi — do wyznaczenia commita i do różnic.
-                    withCredentials([gitUsernamePassword(credentialsId: env.GIT_CREDENTIALS)]) {
-                        sh '''#!/bin/bash
-                            set -euo pipefail
-                            if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --quiet --unshallow; fi
-                            git fetch --quiet --prune --prune-tags --tags --force origin '+refs/heads/*:refs/remotes/origin/*'
-                        '''
-                    }
+                    fetchHistory()
                     env.TARGET_SHA = sh(returnStdout: true, script: 'git rev-parse -q --verify "refs/tags/v$VERSION^{commit}" || true').trim()
                     if (!env.TARGET_SHA) {
                         error "Nie ma tagu v${env.VERSION} w repozytorium web-app."
@@ -173,8 +179,6 @@ pipeline {
 
         stage('Smoke test') {
             steps {
-                // Z internetu, przez Caddy. Kontener przeszedł już health w etapie Wdrożenie, więc problem tutaj
-                // (np. brak wpisu w Caddyfile albo DNS) to build żółty, a nie czerwony.
                 catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
                     script {
                         withEnv(["PUBLIC_URL=${PROD.url}"]) {
@@ -204,8 +208,6 @@ pipeline {
             script {
                 currentBuild.description = SUMMARY.join('\n')
             }
-            // Jenkins podaje artefakty jako text/plain bez kodowania, więc przeglądarka czyta polskie znaki jako Windows-1252.
-            // Znacznik BOM na początku pliku każe jej czytać go jako UTF-8.
             sh(returnStatus: true, script: '''
                 for f in roznice.txt deploy.log; do
                     [ -f "$f" ] || continue
