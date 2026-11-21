@@ -19,7 +19,7 @@ interface CowEntry {
   name: string;
 }
 
-export const AddCowsStep: React.FC<AddCowsStepProps> = ({ farmId, onComplete }) => {
+export const AddCowsStep: React.FC<AddCowsStepProps> = ({ onComplete }) => {
   const [cows, setCows] = useState<CowEntry[]>([{ earTagNumber: '', name: '' }]);
   const [loading, setLoading] = useState(false);
 

@@ -5,7 +5,6 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/hooks/use-auth"
 import { AlertProvider } from "@/hooks/use-alert"
 import { cn } from "@/lib/utils"
-import { AnimatePresence } from "framer-motion"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 

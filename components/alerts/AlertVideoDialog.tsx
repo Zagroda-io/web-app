@@ -33,40 +33,43 @@ export function AlertVideoDialog({
   onClose,
   onReviewed,
 }: AlertVideoDialogProps) {
-  const [url, setUrl] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(false)
+  // Wynik pobierania jest przypięty do alertu, dla którego powstał — klip poprzedniego
+  // alertu nigdy nie mignie w oknie następnego, a „ładowanie” wynika z braku wyniku.
+  const [clip, setClip] = useState<{
+    alertId: string
+    url: string | null
+  } | null>(null)
 
   useEffect(() => {
     if (!alert) return
+    const { farmId, alertId } = alert
     let objectUrl: string | null = null
     let cancelled = false
 
-    setLoading(true)
-    setError(false)
-    getAlertVideoObjectUrl(alert.farmId, alert.alertId)
+    getAlertVideoObjectUrl(farmId, alertId)
       .then((u) => {
         if (cancelled) {
           URL.revokeObjectURL(u)
           return
         }
         objectUrl = u
-        setUrl(u)
+        setClip({ alertId, url: u })
       })
       .catch((err) => {
         console.error("Nie udało się pobrać klipu alertu:", err)
-        if (!cancelled) setError(true)
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
+        if (!cancelled) setClip({ alertId, url: null })
       })
 
     return () => {
       cancelled = true
       if (objectUrl) URL.revokeObjectURL(objectUrl)
-      setUrl(null)
     }
   }, [alert])
+
+  const current = alert && clip?.alertId === alert.alertId ? clip : null
+  const loading = !!alert && !current
+  const error = !!current && current.url === null
+  const url = current?.url ?? null
 
   const meta = alert ? alertTypeMeta(alert.type) : null
 
