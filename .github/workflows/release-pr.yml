@@ -1,0 +1,30 @@
+# Branch wydania release/** dostaje kod wyłącznie z main — PR do release/** musi mieć main jako źródło.
+# Ustaw ten check („Źródło PR”) jako wymagany w regułach release/** (devops/jenkins/README.md).
+# Nie uruchamia BPPR: kod z main przeszedł go już w PR do main. Drugie zabezpieczenie jest w workflow obrazu —
+# wydanie nie powstanie z brancha, który ma commity spoza main.
+name: PR do release
+
+on:
+  pull_request:
+    branches: ['release/**']
+
+permissions: {}
+
+jobs:
+  source:
+    name: Źródło PR
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: PR musi wychodzić z main
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "$HEAD_REF" = main ] && [ "$HEAD_REPO" = "$GITHUB_REPOSITORY" ]; then
+            echo "PR z main do $BASE_REF — w porządku."
+            exit 0
+          fi
+          echo "::error::Do $BASE_REF wchodzi tylko main (ten PR jest z $HEAD_REPO:$HEAD_REF). Poprawkę zrób PR-em do main, a potem PR-em main → $BASE_REF."
+          exit 1

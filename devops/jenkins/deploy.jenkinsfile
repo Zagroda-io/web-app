@@ -1,0 +1,313 @@
+// Job Application_Deployer-Zagroda_WebApp — wdrożenie web-app na DEV (app.dev.zagroda.io) albo PROD (app.zagroda.io).
+// Oba środowiska działają na VM zagroda-backend, obok Jenkinsa (kontener zagroda-jenkins z gniazdem Dockera hosta),
+// więc job nie potrzebuje SSH.
+//
+// Skąd wersja (parametry SOURCE i REF):
+//   TAG    — wydanie vX.Y.Z (obraz X.Y.Z). Jedyne źródło dozwolone na PROD.
+//   BRANCH — ostatni commit brancha, także feature/… (obraz sha-<commit>). Tylko DEV.
+//   COMMIT — konkretny commit (obraz sha-<commit>). Tylko DEV.
+// Na DEV, gdy obrazu sha-<commit> nie ma w rejestrze, job zleca jego build w GitHubie i czeka (devops/jenkins/image.sh).
+// PROD wdraża wyłącznie gotowy obraz wydania — bez builda.
+//
+// Etapy: Przygotowanie → Obraz → Różnice → Zatwierdzenie (PROD) → Wdrożenie → Smoke test.
+// Opis całości i konfiguracja: devops/jenkins/README.md.
+
+SUMMARY = []
+
+// Środowiska. Obraz jest ten sam — różni się tylko adresem API (API_URL, opis w lib/config.ts) i nazwami kontenera.
+// `alias` to nazwa w sieci zagroda-network, na którą wskazuje Caddy (common/devops/configuration/production/Caddyfile).
+ENVIRONMENTS = [
+    DEV : [
+        container : 'zagroda-dev-web-app',
+        alias     : 'web-app-dev',
+        apiUrl    : 'https://dev-api.cloud.zagroda.io/api/v1',
+        url       : 'https://app.dev.zagroda.io',
+        sources   : ['TAG', 'BRANCH', 'COMMIT'],
+        approval  : false,
+        buildImage: true,
+    ],
+    PROD: [
+        container : 'zagroda-web-app',
+        alias     : 'web-app',
+        apiUrl    : 'https://api.cloud.zagroda.io/api/v1',
+        url       : 'https://app.zagroda.io',
+        sources   : ['TAG'],
+        approval  : true,
+        buildImage: false,
+    ],
+]
+
+@NonCPS
+def marker(String log, String name) {
+    def m = log =~ /(?m)^::${name}::(.*)$/
+    return m.find() ? m.group(1).trim() : ''
+}
+
+// Pole z /api/health ({"status":"UP","version":"1.0.0","commit":"…"}).
+@NonCPS
+def jsonField(String json, String name) {
+    def m = json =~ /"${name}"\s*:\s*"([^"]*)"/
+    return m.find() ? m.group(1) : ''
+}
+
+def cfg() {
+    return ENVIRONMENTS[params.ENVIRONMENT]
+}
+
+def triggeredBy() {
+    def causes = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')
+    return causes ? causes[0].userName : 'automat'
+}
+
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        skipDefaultCheckout(true)
+        buildDiscarder(logRotator(numToKeepStr: '50'))
+        timeout(time: 60, unit: 'MINUTES')
+    }
+
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['DEV', 'PROD'],
+            description: 'DEV — app.dev.zagroda.io (tag, branch albo commit). PROD — app.zagroda.io (tylko tag wydania, po zatwierdzeniu).'
+        )
+        choice(
+            name: 'SOURCE',
+            choices: ['BRANCH', 'TAG', 'COMMIT'],
+            description: 'Skąd wersja: BRANCH — ostatni commit brancha, TAG — wydanie vX.Y.Z, COMMIT — konkretny commit. Na PROD tylko TAG.'
+        )
+        string(
+            name: 'REF',
+            defaultValue: 'main',
+            trim: true,
+            description: 'BRANCH: nazwa brancha (main, feature/…). TAG: v1.0.0 albo 1.0.0. COMMIT: skrót (min. 7 znaków) albo pełny SHA.'
+        )
+    }
+
+    environment {
+        GIT_CREDENTIALS = 'zagroda-web-app'           // poświadczenie GitHuba, którym job pobiera repo
+        GITHUB_CREDENTIALS = 'github-web-app-actions' // token z Actions: read and write — zlecanie buildów obrazu (DEV)
+        NETWORK = 'zagroda-network'
+    }
+
+    stages {
+        stage('Przygotowanie') {
+            steps {
+                checkout scm
+                script {
+                    def c = cfg()
+                    if (!c) {
+                        error "Nieznane środowisko: ${params.ENVIRONMENT}"
+                    }
+                    if (!c.sources.contains(params.SOURCE)) {
+                        error "Na ${params.ENVIRONMENT} wdrażamy tylko z: ${c.sources.join(', ')}. Tag vX.Y.Z powstaje po ręcznym uruchomieniu workflow „Budowanie obrazu Docker” na branchu release/**."
+                    }
+
+                    // Pełna historia, wszystkie branche i tagi — do wyznaczenia commita i do różnic.
+                    withCredentials([gitUsernamePassword(credentialsId: env.GIT_CREDENTIALS)]) {
+                        sh '''#!/bin/bash
+                            set -euo pipefail
+                            if [ "$(git rev-parse --is-shallow-repository)" = true ]; then git fetch --quiet --unshallow; fi
+                            git fetch --quiet --prune --prune-tags --tags --force origin '+refs/heads/*:refs/remotes/origin/*'
+                        '''
+                    }
+
+                    def ref = params.REF ?: ''
+                    def gitRef
+                    def label
+                    if (params.SOURCE == 'TAG') {
+                        if (!(ref ==~ /^v?[0-9]+\.[0-9]+\.[0-9]+$/)) {
+                            error "Tag wydania to vX.Y.Z (np. v1.0.0), a nie „${ref}”."
+                        }
+                        env.VERSION = ref.startsWith('v') ? ref.substring(1) : ref
+                        gitRef = "refs/tags/v${env.VERSION}"
+                        label = "v${env.VERSION}"
+                    } else if (params.SOURCE == 'BRANCH') {
+                        if (!(ref ==~ /^[A-Za-z0-9._\/-]{1,200}$/) || ref.contains('..') || ref.startsWith('-')) {
+                            error "Nieprawidłowa nazwa brancha: „${ref}”."
+                        }
+                        gitRef = "refs/remotes/origin/${ref}"
+                        label = ref
+                    } else {
+                        if (!(ref ==~ /^[0-9a-fA-F]{7,40}$/)) {
+                            error "Commit to skrót (min. 7 znaków) albo pełny SHA, a nie „${ref}”."
+                        }
+                        gitRef = ref.toLowerCase()
+                        label = gitRef.take(7)
+                    }
+
+                    def sha = ''
+                    withEnv(["GIT_REF=${gitRef}"]) {
+                        sha = sh(returnStdout: true, script: 'git rev-parse -q --verify "$GIT_REF^{commit}" || true').trim()
+                    }
+                    if (!sha) {
+                        def what = [TAG: "tagu v${env.VERSION}", BRANCH: "brancha ${ref}", COMMIT: "commita ${ref} (albo skrót jest niejednoznaczny)"][params.SOURCE]
+                        error "Nie ma ${what} w repozytorium web-app."
+                    }
+                    env.TARGET_SHA = sha
+                    env.TARGET_TAG = params.SOURCE == 'TAG' ? env.VERSION : "sha-${sha.take(7)}"
+
+                    currentBuild.displayName = "#${env.BUILD_NUMBER} ${params.ENVIRONMENT} ${label}${params.SOURCE == 'TAG' ? '' : ' (' + sha.take(7) + ')'}"
+                    SUMMARY << "web-app:${env.TARGET_TAG} → ${params.ENVIRONMENT} (${c.url.replace('https://', '')}) · ${triggeredBy()}"
+                }
+            }
+        }
+
+        stage('Obraz') {
+            steps {
+                script {
+                    def status = sh(returnStatus: true, script: 'bash devops/jenkins/image.sh exists "$TARGET_TAG"')
+                    if (status == 0) {
+                        return
+                    }
+                    if (status != 3) {
+                        error 'Nie udało się sprawdzić obrazu w Artifact Registry — szczegóły w logu etapu Obraz.'
+                    }
+                    if (params.SOURCE == 'TAG') {
+                        error "Tag v${env.VERSION} nie ma obrazu ${env.TARGET_TAG} w rejestrze. Tag powstaje dopiero po wysłaniu obrazu — sprawdź workflow „Budowanie obrazu Docker” na branchu release/**, z którego wydano v${env.VERSION}."
+                    }
+                    if (!cfg().buildImage) {
+                        error "Brak obrazu ${env.TARGET_TAG} — ${params.ENVIRONMENT} wdraża tylko gotowe obrazy."
+                    }
+                    // Build dev dokładnie tego commita — niezależnie od tego, czy jest końcówką brancha.
+                    withCredentials([string(credentialsId: env.GITHUB_CREDENTIALS, variable: 'GITHUB_TOKEN')]) {
+                        status = sh(returnStatus: true, script: '''#!/bin/bash
+                            set -o pipefail
+                            bash devops/jenkins/image.sh build "$TARGET_SHA" "$TARGET_TAG" 2>&1 | tee image-build.log
+                        ''')
+                    }
+                    def run = marker(readFile('image-build.log'), 'run')
+                    if (status != 0) {
+                        SUMMARY << "Build obrazu w GitHubie nie powiódł się${run ? ': ' + run : ''}"
+                        error 'Nie ma obrazu do wdrożenia — szczegóły w logu etapu Obraz.'
+                    }
+                    SUMMARY << "Zbudowano obraz ${env.TARGET_TAG} w GitHubie${run ? ' (' + run + ')' : ''}"
+                }
+            }
+        }
+
+        stage('Różnice') {
+            steps {
+                script {
+                    withEnv(["ENV_NAME=${params.ENVIRONMENT}", "CONTAINER=${cfg().container}"]) {
+                        sh '''#!/bin/bash
+                            set -o pipefail
+                            bash devops/jenkins/diff.sh 2>&1 | tee roznice.txt
+                        '''
+                    }
+                    def log = readFile('roznice.txt')
+                    def current = marker(log, 'current_tag')
+                    if (marker(log, 'first') == 'true') {
+                        SUMMARY << 'Pierwsze wdrożenie na tym środowisku'
+                    } else if (marker(log, 'same') == 'true') {
+                        SUMMARY << "Ten sam commit co obecnie (${current}) — kontener zostanie odtworzony"
+                    } else if (marker(log, 'unknown') == 'true') {
+                        SUMMARY << "Obecnie ${current} — bez listy zmian (nieznany commit)"
+                    } else {
+                        def parts = ["+${marker(log, 'commits')} commitów"]
+                        if (marker(log, 'removed') != '0') {
+                            parts << "−${marker(log, 'removed')} commitów (cofnięcie)"
+                        }
+                        SUMMARY << "Obecnie ${current} (${marker(log, 'current_sha')}) → ${env.TARGET_TAG}: ${parts.join(', ')}"
+                    }
+                }
+            }
+        }
+
+        stage('Zatwierdzenie') {
+            when {
+                expression { cfg().approval }
+            }
+            steps {
+                timeout(time: 15, unit: 'MINUTES') {
+                    input(
+                        message: "Wdrożyć web-app ${env.TARGET_TAG} na ${params.ENVIRONMENT} (${cfg().url})? Różnice są w logu etapu Różnice i w artefakcie roznice.txt.",
+                        ok: 'Wdróż'
+                    )
+                }
+            }
+        }
+
+        stage('Wdrożenie') {
+            steps {
+                script {
+                    def c = cfg()
+                    def status = 0
+                    withEnv([
+                        "CONTAINER=${c.container}",
+                        "ALIAS=${c.alias}",
+                        "API_URL=${c.apiUrl}",
+                    ]) {
+                        status = sh(returnStatus: true, script: '''#!/bin/bash
+                            set -o pipefail
+                            bash devops/jenkins/deploy.sh 2>&1 | tee deploy.log
+                        ''')
+                    }
+                    def log = readFile('deploy.log')
+                    def previous = marker(log, 'previous')
+                    if (status == 0) {
+                        SUMMARY << "Wdrożono ${env.TARGET_TAG}${previous ? ' (poprzednio ' + previous + ')' : ''}"
+                    } else if (marker(log, 'result') == 'nie-wstala') {
+                        SUMMARY << "Nowa wersja nie wstała — ${previous ? 'dalej działa ' + previous : 'na środowisku nie działa web-app'} (logi w deploy.log)"
+                    } else {
+                        SUMMARY << "Wdrożenie nie powiodło się (kod ${status}) — szczegóły w deploy.log"
+                    }
+                    if (status != 0) {
+                        error 'Wdrożenie nie powiodło się.'
+                    }
+                }
+            }
+        }
+
+        stage('Smoke test') {
+            steps {
+                // Z internetu, przez Caddy. Kontener przeszedł już health w etapie Wdrożenie, więc problem tutaj
+                // (np. brak wpisu w Caddyfile albo DNS) to build żółty, a nie czerwony.
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    script {
+                        def c = cfg()
+                        withEnv(["PUBLIC_URL=${c.url}"]) {
+                            def health = sh(returnStdout: true, script: 'curl -fsS --max-time 15 --retry 5 --retry-delay 3 --retry-all-errors "$PUBLIC_URL/api/health" 2>/dev/null || true').trim()
+                            def runtime = sh(returnStdout: true, script: 'curl -fsS --max-time 15 "$PUBLIC_URL/runtime-config.js" 2>/dev/null || true').trim()
+                            def version = jsonField(health, 'version')
+                            def commit = jsonField(health, 'commit')
+                            SUMMARY << "${c.url.replace('https://', '')}: ${health ? 'UP' : 'brak odpowiedzi'}${version ? ', wersja ' + version : ''}"
+                            if (!health) {
+                                error "${c.url}/api/health nie odpowiada"
+                            }
+                            if (commit != env.TARGET_SHA) {
+                                error "${c.url}/api/health pokazuje commit „${commit ?: 'brak'}”, oczekiwano ${env.TARGET_SHA} — odpowiada inna wersja niż wdrożona"
+                            }
+                            if (jsonField(runtime, 'apiUrl') != c.apiUrl) {
+                                error "${c.url}/runtime-config.js nie wskazuje ${c.apiUrl}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                currentBuild.description = SUMMARY.join('\n')
+            }
+            // Jenkins podaje artefakty jako text/plain bez kodowania, więc przeglądarka czyta polskie znaki jako Windows-1252.
+            // Znacznik BOM na początku pliku każe jej czytać go jako UTF-8.
+            sh(returnStatus: true, script: '''
+                for f in roznice.txt deploy.log image-build.log; do
+                    [ -f "$f" ] || continue
+                    { printf '\\357\\273\\277'; cat "$f"; } > "$f.utf8" && mv "$f.utf8" "$f"
+                done
+            ''')
+            archiveArtifacts(artifacts: 'roznice.txt, deploy.log, image-build.log', allowEmptyArchive: true, fingerprint: false)
+            cleanWs()
+        }
+    }
+}

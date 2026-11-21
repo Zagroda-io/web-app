@@ -1,0 +1,297 @@
+# Obraz web-app → Artifact Registry w GCP (europe-central2-docker.pkg.dev/<projekt>/zagroda/web-app).
+#
+#  - push na main:              BPPR, obraz dev-latest, main i sha-<commit>;
+#  - ręcznie na release/**:     wydanie — BPPR, kolejna wersja (patch, minor albo major) od ostatniego tagu vX.Y.Z,
+#                               obraz X.Y.Z i sha-<commit> (latest — gdy to najwyższa wersja), potem tag vX.Y.Z
+#                               i wydanie na GitHubie. Tag powstaje dopiero po wysłaniu obrazu, więc każdy tag ma
+#                               swój obraz — tylko z tagu wolno wdrożyć PROD. Release musi mieć wyłącznie kod z main;
+#  - ręcznie na innym branchu:  build dev — obraz sha-<commit> ostatniego commita brancha albo commita z pola
+#                               „commit” (tak zleca obraz job Application_Deployer-Zagroda_WebApp dla DEV).
+#
+# Pull requesty nie budują obrazu — sprawdza je BPPR (bppr.yml). Push na release/** też nie: wydanie jest zawsze ręczne.
+# Commit, który ma już tag vX.Y.Z, nie dostaje drugiego — ponowne uruchomienie tylko odtwarza obraz tej wersji.
+# Konfiguracja GCP (Workload Identity Federation, bez kluczy JSON) i Jenkinsa: devops/jenkins/README.md.
+name: Budowanie obrazu Docker
+
+run-name: >-
+  ${{ github.event_name == 'push' && github.event.head_commit.message
+  || startsWith(github.ref_name, 'release/') && format('Wydanie ({0}) z {1}', inputs.release, github.ref_name)
+  || inputs.commit != '' && format('Build dev {0}', inputs.commit)
+  || format('Build dev z {0}', github.ref_name) }}
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Podbicie wersji — tylko na branchu release/** (na innych branchach bez znaczenia)
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+      commit:
+        description: Build dev konkretnego commita (SHA) — puste = ostatni commit brancha. Nie na release/**.
+        type: string
+        default: ''
+
+# Wydania idą po kolei (każde liczy wersję od ostatniego tagu), buildy dev — osobno dla każdego commita/brancha.
+concurrency:
+  group: ${{ startsWith(github.ref, 'refs/heads/release/') && 'image-release' || format('image-{0}', inputs.commit || github.ref) }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ${{ vars.GAR_LOCATION || 'europe-central2' }}-docker.pkg.dev
+  IMAGE: ${{ vars.GAR_LOCATION || 'europe-central2' }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID || 'project-64d85145-d47a-4fa5-b25' }}/${{ vars.GAR_REPOSITORY || 'zagroda' }}/${{ vars.GAR_IMAGE || 'web-app' }}
+
+jobs:
+  prepare:
+    name: Rodzaj buildu i wersja
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      kind: ${{ steps.kind.outputs.kind }}
+      sha: ${{ steps.kind.outputs.sha }}
+      short: ${{ steps.kind.outputs.short }}
+      version: ${{ steps.kind.outputs.version }}
+      app_version: ${{ steps.kind.outputs.app_version }}
+      tag_exists: ${{ steps.kind.outputs.tag_exists }}
+      latest: ${{ steps.kind.outputs.latest }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Rodzaj buildu i wersja
+        id: kind
+        env:
+          BUMP: ${{ inputs.release || 'patch' }}
+          COMMIT: ${{ inputs.commit }}
+        run: |
+          set -euo pipefail
+          sha="$GITHUB_SHA"
+          version=""
+          tag_exists=false
+          latest=false
+          # Tagi wydań vX.Y.Z jako X.Y.Z, rosnąco.
+          versions() { { grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' || true; } | sed 's/^v//' | sort -V; }
+
+          if [[ "$GITHUB_REF_NAME" == release/* ]]; then
+            kind=release
+            if [ -n "$COMMIT" ]; then
+              echo "::error::Wydanie powstaje z ostatniego commita $GITHUB_REF_NAME — zostaw pole commit puste."
+              exit 1
+            fi
+
+            # Release dostaje kod tylko z main (PR main → release). Commit spoza main = ominięcie BPPR.
+            foreign=$(git rev-list --no-merges "origin/main..$sha")
+            if [ -n "$foreign" ]; then
+              echo "::error::$GITHUB_REF_NAME ma commity, których nie ma w main — wydanie wstrzymane. Poprawki idą PR-em do main, potem PR-em main → $GITHUB_REF_NAME."
+              # shellcheck disable=SC2086 # lista commitów
+              git log --no-walk --format='  %h %an: %s' $foreign
+              exit 1
+            fi
+
+            version=$(git tag --points-at "$sha" | versions | tail -n 1)
+            if [ -n "$version" ]; then
+              tag_exists=true
+              echo "::notice::Commit ${sha:0:7} jest już wydany jako v$version — bez nowego tagu, obraz $version zostanie odtworzony."
+            else
+              # patch — od ostatniej wersji w historii tego brancha (poprawka starszej linii: 1.0.0 → 1.0.1, choć jest
+              # już 1.1.0); minor i major — od najwyższej wersji w repo.
+              base=""
+              if [ "$BUMP" = patch ]; then base=$(git tag --merged "$sha" | versions | tail -n 1); fi
+              base="${base:-$(git tag | versions | tail -n 1)}"
+              base="${base:-0.0.0}"
+              IFS=. read -r major minor patch <<< "$base"
+              case "$BUMP" in
+                major) major=$((major + 1)); minor=0; patch=0 ;;
+                minor) minor=$((minor + 1)); patch=0 ;;
+                patch) patch=$((patch + 1)) ;;
+                *) echo "::error::Nieznane podbicie wersji: $BUMP"; exit 1 ;;
+              esac
+              # Numer zajęty przez wydanie z innego brancha — bierzemy kolejny wolny patch.
+              while git rev-parse -q --verify "refs/tags/v$major.$minor.$patch" >/dev/null; do patch=$((patch + 1)); done
+              version="$major.$minor.$patch"
+              echo "Podstawa: v$base → nowe wydanie: v$version ($BUMP)"
+            fi
+            # latest tylko dla najwyższej wersji — poprawka starszej linii go nie cofa.
+            highest=$( { git tag; echo "v$version"; } | versions | tail -n 1)
+            if [ "$highest" = "$version" ]; then latest=true; fi
+
+          elif [ -n "$COMMIT" ]; then
+            kind=dev
+            if ! sha=$(git rev-parse -q --verify "$COMMIT^{commit}"); then
+              echo "::error::Nie ma commita $COMMIT w repozytorium (albo skrót jest niejednoznaczny)."
+              exit 1
+            fi
+          elif [ "$GITHUB_REF_NAME" = main ]; then
+            kind=main
+          else
+            kind=dev
+          fi
+
+          short="${sha:0:7}"
+          {
+            echo "kind=$kind"
+            echo "sha=$sha"
+            echo "short=$short"
+            echo "version=$version"
+            echo "app_version=${version:-dev-$short}"
+            echo "tag_exists=$tag_exists"
+            echo "latest=$latest"
+          } >> "$GITHUB_OUTPUT"
+          echo "Rodzaj: $kind, ref $GITHUB_REF_NAME, commit $short${version:+, wersja $version}"
+
+  checks:
+    name: BPPR
+    needs: prepare
+    # Build dev (zwykle zlecony z Jenkinsa dla DEV) ma być szybki — kod z PR przeszedł już BPPR.
+    if: needs.prepare.outputs.kind == 'main' || needs.prepare.outputs.kind == 'release'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/bppr.yml
+    with:
+      ref: ${{ needs.prepare.outputs.sha }}
+
+  image:
+    name: Obraz → Artifact Registry
+    needs: [prepare, checks]
+    # `checks` jest pomijany dla buildów dev — obraz budujemy mimo to.
+    if: "!cancelled() && needs.prepare.result == 'success' && (needs.checks.result == 'success' || needs.checks.result == 'skipped')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+
+      - name: Tagi i etykiety
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=${{ needs.prepare.outputs.version }},enable=${{ needs.prepare.outputs.kind == 'release' }}
+            type=raw,value=latest,enable=${{ needs.prepare.outputs.latest == 'true' }}
+            type=raw,value=dev-latest,enable=${{ needs.prepare.outputs.kind == 'main' }}
+            type=raw,value=main,enable=${{ needs.prepare.outputs.kind == 'main' }}
+            type=raw,value=sha-${{ needs.prepare.outputs.short }}
+          flavor: |
+            latest=false
+          labels: |
+            org.opencontainers.image.title=Zagroda — web-app
+            org.opencontainers.image.version=${{ needs.prepare.outputs.app_version }}
+            org.opencontainers.image.revision=${{ needs.prepare.outputs.sha }}
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Logowanie do GCP
+        id: gcp
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+
+      - name: Logowanie do Artifact Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: oauth2accesstoken
+          password: ${{ steps.gcp.outputs.access_token }}
+
+      # Wydanie nie może nadpisać obrazu tej samej wersji zbudowanego z innego commita.
+      - name: Wersja wolna w rejestrze
+        if: needs.prepare.outputs.kind == 'release'
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SHA: ${{ needs.prepare.outputs.sha }}
+        run: |
+          if ! revision=$(docker buildx imagetools inspect "$IMAGE:$VERSION" --format '{{ index .Image.Config.Labels "org.opencontainers.image.revision" }}' 2>/dev/null); then
+            echo "Obrazu $VERSION nie ma jeszcze w rejestrze."
+            exit 0
+          fi
+          if [ "$revision" = "$SHA" ]; then
+            echo "Obraz $VERSION jest już z tego commita — zostanie odświeżony."
+            exit 0
+          fi
+          echo "::error::Obraz $IMAGE:$VERSION już jest w rejestrze z innego commita (${revision:-bez etykiety}) — wydanie by go nadpisało. Wydaj wyższą wersję (minor albo major)."
+          exit 1
+
+      - name: Build i push
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            APP_VERSION=${{ needs.prepare.outputs.app_version }}
+            GIT_SHA=${{ needs.prepare.outputs.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Podsumowanie
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+          KIND: ${{ needs.prepare.outputs.kind }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SHORT: ${{ needs.prepare.outputs.short }}
+        run: |
+          case "$KIND" in
+            release) hint="ENVIRONMENT=PROD (albo DEV), SOURCE=TAG, REF=v$VERSION" ;;
+            *)       hint="ENVIRONMENT=DEV, SOURCE=COMMIT, REF=$SHORT" ;;
+          esac
+          {
+            echo "### Obraz wysłany"
+            echo
+            echo '```'
+            echo "$TAGS"
+            echo '```'
+            echo
+            echo "Digest: \`$DIGEST\`"
+            echo
+            echo "Wdrożenie: job **Application_Deployer-Zagroda_WebApp** w Jenkinsie, $hint."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  release:
+    name: Tag i wydanie
+    needs: [prepare, image]
+    if: "!cancelled() && needs.image.result == 'success' && needs.prepare.outputs.kind == 'release' && needs.prepare.outputs.tag_exists != 'true'"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          fetch-depth: 0
+
+      - name: Tag v${{ needs.prepare.outputs.version }} i wydanie na GitHubie
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+          SHA: ${{ needs.prepare.outputs.sha }}
+          DIGEST: ${{ needs.image.outputs.digest }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v$VERSION" -m "Wydanie v$VERSION" "$SHA"
+          git push origin "v$VERSION"
+          notes=$(mktemp)
+          printf 'Obraz: `%s:%s` (digest `%s`)\n\nWdrożenie na PROD: job Application_Deployer-Zagroda_WebApp, SOURCE=TAG, REF=v%s.\n' \
+            "$IMAGE" "$VERSION" "$DIGEST" "$VERSION" > "$notes"
+          gh release create "v$VERSION" --title "v$VERSION" --generate-notes --notes-file "$notes" --verify-tag
+          echo "Wydano v$VERSION z commita ${SHA:0:7}." >> "$GITHUB_STEP_SUMMARY"
