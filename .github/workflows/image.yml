@@ -5,10 +5,11 @@
 #                               obraz X.Y.Z i sha-<commit> (latest — gdy to najwyższa wersja), potem tag vX.Y.Z
 #                               i wydanie na GitHubie. Tag powstaje dopiero po wysłaniu obrazu, więc każdy tag ma
 #                               swój obraz — tylko z tagu wolno wdrożyć PROD. Release musi mieć wyłącznie kod z main;
-#  - ręcznie na innym branchu:  build dev — obraz sha-<commit> ostatniego commita brancha albo commita z pola
-#                               „commit” (tak zleca obraz job Application_Deployer-Zagroda_WebApp dla DEV).
+#  - ręcznie na innym branchu:  build dev — obraz sha-<commit> ostatniego commita brancha (np. do sprawdzenia obrazu).
 #
 # Pull requesty nie budują obrazu — sprawdza je BPPR (bppr.yml). Push na release/** też nie: wydanie jest zawsze ręczne.
+# PROD (app.zagroda.io) wdraża job Application_Deployer-Zagroda_WebApp w Jenkinsie, z tagu. DEV (app.dev.zagroda.io)
+# działa na Vercelu i buduje się tam sam — bez tego obrazu.
 # Commit, który ma już tag vX.Y.Z, nie dostaje drugiego — ponowne uruchomienie tylko odtwarza obraz tej wersji.
 # Konfiguracja GCP (Workload Identity Federation, bez kluczy JSON) i Jenkinsa: devops/jenkins/README.md.
 name: Budowanie obrazu Docker
@@ -16,7 +17,6 @@ name: Budowanie obrazu Docker
 run-name: >-
   ${{ github.event_name == 'push' && github.event.head_commit.message
   || startsWith(github.ref_name, 'release/') && format('Wydanie ({0}) z {1}', inputs.release, github.ref_name)
-  || inputs.commit != '' && format('Build dev {0}', inputs.commit)
   || format('Build dev z {0}', github.ref_name) }}
 
 on:
@@ -29,14 +29,10 @@ on:
         type: choice
         options: [patch, minor, major]
         default: patch
-      commit:
-        description: Build dev konkretnego commita (SHA) — puste = ostatni commit brancha. Nie na release/**.
-        type: string
-        default: ''
 
-# Wydania idą po kolei (każde liczy wersję od ostatniego tagu), buildy dev — osobno dla każdego commita/brancha.
+# Wydania idą po kolei (każde liczy wersję od ostatniego tagu), pozostałe buildy — osobno dla każdego brancha.
 concurrency:
-  group: ${{ startsWith(github.ref, 'refs/heads/release/') && 'image-release' || format('image-{0}', inputs.commit || github.ref) }}
+  group: ${{ startsWith(github.ref, 'refs/heads/release/') && 'image-release' || format('image-{0}', github.ref) }}
   cancel-in-progress: false
 
 env:
@@ -67,7 +63,6 @@ jobs:
         id: kind
         env:
           BUMP: ${{ inputs.release || 'patch' }}
-          COMMIT: ${{ inputs.commit }}
         run: |
           set -euo pipefail
           sha="$GITHUB_SHA"
@@ -79,10 +74,6 @@ jobs:
 
           if [[ "$GITHUB_REF_NAME" == release/* ]]; then
             kind=release
-            if [ -n "$COMMIT" ]; then
-              echo "::error::Wydanie powstaje z ostatniego commita $GITHUB_REF_NAME — zostaw pole commit puste."
-              exit 1
-            fi
 
             # Release dostaje kod tylko z main (PR main → release). Commit spoza main = ominięcie BPPR.
             foreign=$(git rev-list --no-merges "origin/main..$sha")
@@ -120,12 +111,6 @@ jobs:
             highest=$( { git tag; echo "v$version"; } | versions | tail -n 1)
             if [ "$highest" = "$version" ]; then latest=true; fi
 
-          elif [ -n "$COMMIT" ]; then
-            kind=dev
-            if ! sha=$(git rev-parse -q --verify "$COMMIT^{commit}"); then
-              echo "::error::Nie ma commita $COMMIT w repozytorium (albo skrót jest niejednoznaczny)."
-              exit 1
-            fi
           elif [ "$GITHUB_REF_NAME" = main ]; then
             kind=main
           else
@@ -147,7 +132,7 @@ jobs:
   checks:
     name: BPPR
     needs: prepare
-    # Build dev (zwykle zlecony z Jenkinsa dla DEV) ma być szybki — kod z PR przeszedł już BPPR.
+    # Build dev ma być szybki — kod z PR przeszedł już BPPR.
     if: needs.prepare.outputs.kind == 'main' || needs.prepare.outputs.kind == 'release'
     permissions:
       contents: read
@@ -246,12 +231,7 @@ jobs:
           DIGEST: ${{ steps.build.outputs.digest }}
           KIND: ${{ needs.prepare.outputs.kind }}
           VERSION: ${{ needs.prepare.outputs.version }}
-          SHORT: ${{ needs.prepare.outputs.short }}
         run: |
-          case "$KIND" in
-            release) hint="ENVIRONMENT=PROD (albo DEV), SOURCE=TAG, REF=v$VERSION" ;;
-            *)       hint="ENVIRONMENT=DEV, SOURCE=COMMIT, REF=$SHORT" ;;
-          esac
           {
             echo "### Obraz wysłany"
             echo
@@ -261,7 +241,9 @@ jobs:
             echo
             echo "Digest: \`$DIGEST\`"
             echo
-            echo "Wdrożenie: job **Application_Deployer-Zagroda_WebApp** w Jenkinsie, $hint."
+            if [ "$KIND" = release ]; then
+              echo "Wdrożenie na PROD: job **Application_Deployer-Zagroda_WebApp** w Jenkinsie, \`TAG=v$VERSION\`."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
 
   release:
@@ -291,7 +273,7 @@ jobs:
           git tag -a "v$VERSION" -m "Wydanie v$VERSION" "$SHA"
           git push origin "v$VERSION"
           notes=$(mktemp)
-          printf 'Obraz: `%s:%s` (digest `%s`)\n\nWdrożenie na PROD: job Application_Deployer-Zagroda_WebApp, SOURCE=TAG, REF=v%s.\n' \
+          printf 'Obraz: `%s:%s` (digest `%s`)\n\nWdrożenie na PROD: job Application_Deployer-Zagroda_WebApp, TAG=v%s.\n' \
             "$IMAGE" "$VERSION" "$DIGEST" "$VERSION" > "$notes"
           gh release create "v$VERSION" --title "v$VERSION" --generate-notes --notes-file "$notes" --verify-tag
           echo "Wydano v$VERSION z commita ${SHA:0:7}." >> "$GITHUB_STEP_SUMMARY"
