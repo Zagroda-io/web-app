@@ -11,7 +11,6 @@ import {
   Eye,
   EyeOff,
   LoaderCircle,
-  Sprout,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -21,37 +20,6 @@ import {
   PHONE_PREFIX,
   type PasswordStrength,
 } from "@/lib/auth/validation"
-
-/* ───────────── logo ───────────── */
-
-export function ZagrodaLogo({
-  className,
-  size = "md",
-}: {
-  className?: string
-  size?: "md" | "sm"
-}) {
-  return (
-    <span className={cn("flex items-center", size === "md" ? "gap-3" : "gap-2.5", className)}>
-      <span
-        className={cn(
-          "inline-flex flex-none items-center justify-center bg-z-accent text-white dark:bg-[#2E5E3A]",
-          size === "md" ? "size-11 rounded-[14px]" : "size-9 rounded-[11px]"
-        )}
-      >
-        <Sprout className={size === "md" ? "size-[22px]" : "size-[18px]"} strokeWidth={1.9} />
-      </span>
-      <span
-        className={cn(
-          "font-bold tracking-[-0.02em]",
-          size === "md" ? "text-[22px]" : "text-[19px]"
-        )}
-      >
-        Zagroda
-      </span>
-    </span>
-  )
-}
 
 /* ───────────── przyciski ───────────── */
 

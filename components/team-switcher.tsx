@@ -26,6 +26,7 @@ import {
   TractorIcon,
 } from "lucide-react"
 import { CreateFarmDialog } from "@/components/farm/CreateFarmDialog"
+import { ZagrodaMark } from "@/components/brand/zagroda-logo"
 
 const getLogo = (type?: string) => {
   switch (type) {
@@ -97,9 +98,9 @@ export function TeamSwitcher() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                {getLogo(currentFarm?.type)}
-              </div>
+              {/* Jak w aplikacji mobilnej: znak Zagrody obok nazwy aktywnego gospodarstwa. */}
+              {/* size-8!: SidebarMenuButton zmniejsza każde <svg> w środku do 16 px. */}
+              <ZagrodaMark size={32} labelled={false} className="size-8!" />
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
                   {currentFarm?.name}

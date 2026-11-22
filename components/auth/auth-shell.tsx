@@ -11,7 +11,7 @@ import {
   Video,
 } from "lucide-react"
 
-import { ZagrodaLogo } from "@/components/auth/auth-ui"
+import { ZagrodaLogo, ZagrodaMark } from "@/components/brand/zagroda-logo"
 
 /**
  * Układ ekranów wejścia z designu (W1/W2): z lewej ciemnozielony panel marki,
@@ -62,24 +62,11 @@ function BrandAside({ label, children }: { label: string; children: React.ReactN
       className="m-4 mr-0 hidden flex-col gap-6 overflow-hidden rounded-[28px] bg-[#17241B] px-11 pt-9 pb-10 text-[#F2F4EF] min-[960px]:flex"
     >
       <span className="flex items-center gap-3">
-        <span className="inline-flex size-11 flex-none items-center justify-center rounded-[14px] bg-[#2E5E3A] text-white">
-          <SproutMark />
-        </span>
+        <ZagrodaMark size={44} labelled={false} />
         <span className="text-[22px] font-bold tracking-[-0.02em]">Zagroda</span>
       </span>
       {children}
     </aside>
-  )
-}
-
-function SproutMark() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-[22px]" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M7 20h10" />
-      <path d="M10 20c5.5-2.5.8-6.4 3-10" />
-      <path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z" />
-      <path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z" />
-    </svg>
   )
 }
 
