@@ -9,6 +9,7 @@ import React, {
 } from "react"
 import { userService } from "@/lib/api/user-service"
 import { Farm } from "@/types/farm"
+import { getAccessToken } from "@/lib/auth/token-storage"
 
 interface UserContextType {
   farms: Farm[]
@@ -42,7 +43,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     // Ładujemy dane zaraz po zainicjalizowaniu providera (np. po zalogowaniu)
-    if (typeof window !== "undefined" && localStorage.getItem("accessToken")) {
+    if (getAccessToken()) {
       loadData()
     } else {
       setLoading(false)

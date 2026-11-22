@@ -276,3 +276,70 @@
         scrollbar-color: var(--muted) transparent;
     }
 }
+/*
+ * Paleta ekranów wejścia (logowanie, rejestracja) z designu „Zagroda — aplikacja mobilna”,
+ * strona „Aplikacja web”: ciepła biel, ciemna zieleń, czarne przyciski.
+ * Klasy: bg-z-bg, text-z-ink, border-z-line… (komponenty w components/auth).
+ */
+@theme inline {
+    --color-z-bg: var(--z-bg);
+    --color-z-bg-sunken: var(--z-bg-sunken);
+    --color-z-surface: var(--z-surface);
+    --color-z-surface-2: var(--z-surface-2);
+    --color-z-raised: var(--z-raised);
+    --color-z-line: var(--z-line);
+    --color-z-line-strong: var(--z-line-strong);
+    --color-z-ink: var(--z-ink);
+    --color-z-ink-2: var(--z-ink-2);
+    --color-z-ink-3: var(--z-ink-3);
+    --color-z-on-ink: var(--z-on-ink);
+    --color-z-accent: var(--z-accent);
+    --color-z-link: var(--z-link);
+    --color-z-green-100: var(--z-green-100);
+    --color-z-red: var(--z-red);
+    --color-z-red-bg: var(--z-red-bg);
+    --color-z-red-line: var(--z-red-line);
+    --color-z-red-ink: var(--z-red-ink);
+}
+
+:root {
+    --z-bg: #f4f2eb;
+    --z-bg-sunken: #ece9df;
+    --z-surface: #ffffff;
+    --z-surface-2: #faf9f5;
+    --z-raised: #ffffff;
+    --z-line: #e3dfd3;
+    --z-line-strong: #cfc9b9;
+    --z-ink: #151915;
+    --z-ink-2: #3f453e;
+    --z-ink-3: #5f655d;
+    --z-on-ink: #ffffff;
+    --z-accent: #2e5e3a;
+    --z-link: #2e5e3a;
+    --z-green-100: #e2eedb;
+    --z-red: #c63f29;
+    --z-red-bg: #fbe5df;
+    --z-red-line: #f0c3b7;
+    --z-red-ink: #962a18;
+}
+
+.dark {
+    --z-bg: #0e1411;
+    --z-bg-sunken: #1b241e;
+    --z-surface: #151d18;
+    --z-surface-2: #121915;
+    --z-raised: #26312a;
+    --z-line: #27322b;
+    --z-line-strong: #3a473f;
+    --z-ink: #eef1eb;
+    --z-ink-2: #c4ccc1;
+    --z-ink-3: #9aa597;
+    --z-on-ink: #0e1411;
+    --z-accent: #8fcb98;
+    --z-link: #8fcb98;
+    --z-green-100: #1d3123;
+    --z-red: #f0624a;
+    --z-red-bg: #3a1a14;
+    --z-red-line: #62291e;
+    --z-red-ink: #ffb4a6;
+}
