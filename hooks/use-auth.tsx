@@ -3,10 +3,26 @@
 import React, { createContext, useContext, useEffect, useState } from "react"
 import { AuthState, User } from "@/types/auth"
 import { authService } from "@/lib/api/auth-service"
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  saveTokens,
+} from "@/lib/auth/token-storage"
 import { useRouter } from "next/navigation"
 
+interface LoginOptions {
+  /** „Zapamiętaj mnie na tym komputerze” — sesja przeżyje zamknięcie przeglądarki. */
+  remember?: boolean
+}
+
 interface AuthContextType extends AuthState {
-  login: (accessToken: string, refreshToken: string, user: User) => void
+  login: (
+    accessToken: string,
+    refreshToken: string,
+    user: User,
+    options?: LoginOptions
+  ) => void
   logout: () => void
   isLoading: boolean
 }
@@ -23,8 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken")
-    const refreshToken = localStorage.getItem("refreshToken")
+    const accessToken = getAccessToken()
+    const refreshToken = getRefreshToken()
     // W prawdziwej aplikacji tutaj pobralibyśmy też profil użytkownika z API
 
     if (accessToken && refreshToken) {
@@ -37,9 +53,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false)
   }, [])
 
-  const login = (accessToken: string, refreshToken: string, user: User) => {
-    localStorage.setItem("accessToken", accessToken)
-    localStorage.setItem("refreshToken", refreshToken)
+  const login = (
+    accessToken: string,
+    refreshToken: string,
+    user: User,
+    { remember = true }: LoginOptions = {}
+  ) => {
+    saveTokens(accessToken, refreshToken, remember)
     setAuthState({
       user,
       accessToken,
@@ -50,15 +70,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      const refreshToken = localStorage.getItem("refreshToken")
+      const refreshToken = getRefreshToken()
       if (refreshToken) {
         await authService.logout({ refreshToken })
       }
     } catch (error) {
       console.error("Logout failed:", error)
       // Nawet jeśli API zawiedzie, czyścimy stan lokalny
-      localStorage.removeItem("accessToken")
-      localStorage.removeItem("refreshToken")
+      clearTokens()
     } finally {
       setAuthState({
         user: null,

@@ -1,6 +1,12 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios"
 import { config } from "./config"
 import { TokenResponse } from "@/types/auth"
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  updateTokens,
+} from "./auth/token-storage"
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: config.apiUrl,
@@ -13,7 +19,7 @@ const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("accessToken")
+      const token = getAccessToken()
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`
       }
@@ -63,7 +69,7 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true
       isRefreshing = true
 
-      const refreshToken = localStorage.getItem("refreshToken")
+      const refreshToken = getRefreshToken()
       if (!refreshToken) {
         isRefreshing = false
         // Przekierowanie do logowania lub czyszczenie stanu
@@ -79,8 +85,7 @@ apiClient.interceptors.response.use(
         )
 
         const { accessToken, refreshToken: newRefreshToken } = response.data
-        localStorage.setItem("accessToken", accessToken)
-        localStorage.setItem("refreshToken", newRefreshToken)
+        updateTokens(accessToken, newRefreshToken)
 
         apiClient.defaults.headers.common["Authorization"] =
           `Bearer ${accessToken}`
@@ -88,8 +93,7 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError, null)
-        localStorage.removeItem("accessToken")
-        localStorage.removeItem("refreshToken")
+        clearTokens()
         // Tutaj można dodać przekierowanie do strony logowania
         return Promise.reject(refreshError)
       } finally {

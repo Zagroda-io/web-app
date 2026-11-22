@@ -9,6 +9,15 @@ export interface LoginRequest {
   password?: string
 }
 
+/** Body `POST /auth/register` (core-api RegisterRequest). */
+export interface RegisterRequest {
+  fullName: string
+  email: string
+  password: string
+  /** E.164, np. „+48601234567”. */
+  phoneNumber?: string
+}
+
 export interface RefreshRequest {
   refreshToken: string
 }
