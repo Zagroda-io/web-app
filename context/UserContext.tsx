@@ -24,7 +24,11 @@ interface UserContextType {
    */
   error: string | null
   switchFarm: (farmId: string) => Promise<void>
-  refreshUser: () => Promise<void>
+  /**
+   * Pobiera dane konta ponownie. `silent` — bez stanu ładowania i bez ekranu błędu:
+   * panel zostaje na miejscu (np. pod ekranem powitania po konfiguracji).
+   */
+  refreshUser: (options?: { silent?: boolean }) => Promise<void>
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -41,10 +45,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async ({ silent = false }: { silent?: boolean } = {}) => {
     try {
-      setLoading(true)
-      setError(null)
+      if (!silent) {
+        setLoading(true)
+        setError(null)
+      }
       const { data } = await userService.getUserInfo()
       setFarms(data.farms)
       setActiveFarmId(data.activeFarmId)
@@ -52,7 +58,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (err) {
       console.error("Błąd ładowania danych użytkownika", err)
       // 401 kończy sesję w api-client, a RequireAuth przenosi do logowania.
-      if (!(isAxiosError(err) && err.response?.status === 401)) {
+      // Ciche odświeżenie nie zasłania panelu błędem — zostają poprzednie dane.
+      if (!silent && !(isAxiosError(err) && err.response?.status === 401)) {
         setError(
           isAxiosError(err) && !err.response
             ? "Nie możemy połączyć się z serwerem. Sprawdź internet i spróbuj ponownie."
@@ -60,7 +67,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         )
       }
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }, [])
 

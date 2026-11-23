@@ -30,7 +30,8 @@ export function SetupFlow({
   owner: string | null
   fullName: string | null
   email: string | null
-  onFinish: (href?: string) => void
+  /** `farm` — nowe gospodarstwo, do ekranu „Witaj w platformie Zagroda”. */
+  onFinish: (href: string | undefined, farm: Farm | null) => void
 }) {
   const [step, setStep] = React.useState<SetupStep | null>(initialStep)
   const [farm, setFarm] = React.useState<Farm | null>(initialFarm)
@@ -43,7 +44,7 @@ export function SetupFlow({
 
   const finish = (href?: string) => {
     finishSetup(owner)
-    onFinish(href)
+    onFinish(href, farm)
   }
 
   if (step === null) {
