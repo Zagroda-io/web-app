@@ -8,15 +8,24 @@ let user: { farms: unknown[]; loading: boolean; error: string | null } = {
   error: null,
 }
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => "/dashboard",
+}))
+
 vi.mock("@/context/UserContext", () => ({
-  useUser: () => ({ ...user, refreshUser }),
+  useUser: () => ({ ...user, activeFarm: null, fullName: null, email: null, refreshUser }),
 }))
 vi.mock("@/hooks/use-auth", () => ({ useAuth: () => ({ logout: vi.fn() }) }))
-vi.mock("@/components/onboarding/OnboardingScreen", () => ({
-  OnboardingScreen: () => <div>onboarding</div>,
+vi.mock("@/components/setup/setup-flow", () => ({
+  SetupFlow: () => <div>onboarding</div>,
 }))
 vi.mock("@/components/app-sidebar", () => ({ AppSidebar: () => null }))
 vi.mock("@/components/shell-header", () => ({ ShellHeader: () => null }))
+vi.mock("@/components/ui/sidebar", () => ({
+  SidebarProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  SidebarInset: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
 
 import { DashboardContent } from "./dashboard-content"
 
@@ -36,9 +45,16 @@ describe("DashboardContent", () => {
     expect(refreshUser).toHaveBeenCalled()
   })
 
-  it("onboarding tylko wtedy, gdy API potwierdzi brak gospodarstw", () => {
+  it("powitanie i konfiguracja tylko wtedy, gdy API potwierdzi brak gospodarstw", () => {
     user = { farms: [], loading: false, error: null }
     render(<DashboardContent defaultOpen>treść</DashboardContent>)
     expect(screen.getByText("onboarding")).toBeInTheDocument()
+  })
+
+  it("z gospodarstwem i bez przerwanej konfiguracji pokazuje panel", () => {
+    user = { farms: [{ id: "f1" }], loading: false, error: null }
+    render(<DashboardContent defaultOpen>treść</DashboardContent>)
+    expect(screen.queryByText("onboarding")).toBeNull()
+    expect(screen.getByText("treść")).toBeInTheDocument()
   })
 })

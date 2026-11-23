@@ -150,11 +150,12 @@ export async function addAnimalEvent(
  * POST /api/v1/farms/{farmId}/herd/cows
  */
 export interface AddCowRequest {
-  name: string
+  /** Opcjonalne — w konfiguracji (W6b) wystarczy kolczyk, data urodzenia i rasa. */
+  name?: string
   birthDate: string
   breed: string
   earTagNumber: string
-  bookType: string
+  bookType?: string
   sex?: Sex
   sensorId?: string
   mother?: {

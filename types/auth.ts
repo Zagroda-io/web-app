@@ -44,4 +44,7 @@ import { Farm } from "./farm"
 export interface UserInfoResponse {
   farms: Farm[]
   activeFarmId: string | null
+  /** Imię i nazwisko z rejestracji — powitanie i inicjały. */
+  fullName?: string | null
+  email?: string | null
 }

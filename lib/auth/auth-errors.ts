@@ -60,3 +60,14 @@ export function smsErrorMessage(
   }
   return GENERIC
 }
+
+/**
+ * Komunikat dla zapytań poza logowaniem. Błędy walidacji (400/409) z core-api niosą
+ * gotowy powód w `detail` (np. „Krowa o tym kolczyku już jest w stadzie”).
+ */
+export function requestErrorMessage(error: unknown): string {
+  const status = httpStatus(error)
+  if (status === null) return OFFLINE
+  if (status === 400 || status === 409) return problemDetail(error) ?? GENERIC
+  return GENERIC
+}

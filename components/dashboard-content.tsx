@@ -1,7 +1,10 @@
 'use client';
 
 import { useUser } from "@/context/UserContext"
-import { OnboardingScreen } from "@/components/onboarding/OnboardingScreen"
+import { SetupFlow } from "@/components/setup/setup-flow"
+import { getSetupStep, resolveSetup } from "@/lib/setup/setup-state"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { ShellHeader } from "@/components/shell-header"
@@ -18,7 +21,7 @@ export function DashboardContent({
   children: React.ReactNode, 
   defaultOpen: boolean 
 }) {
-  const { farms, loading, error, refreshUser } = useUser()
+  const { loading, error, refreshUser } = useUser()
   const { logout } = useAuth()
 
   if (loading) {
@@ -50,9 +53,41 @@ export function DashboardContent({
     )
   }
 
-  // Jeśli nie ma farm, wyświetlamy ekran onboardingu
-  if (farms.length === 0) {
-    return <OnboardingScreen />
+  return <DashboardReady defaultOpen={defaultOpen}>{children}</DashboardReady>
+}
+
+/**
+ * Dane konta są już wczytane. Raz, przy montowaniu, decydujemy, czy pokazać powitanie
+ * i konfigurację (brak gospodarstwa albo przerwana konfiguracja), czy panel.
+ */
+function DashboardReady({
+  children,
+  defaultOpen,
+}: {
+  children: React.ReactNode
+  defaultOpen: boolean
+}) {
+  const { farms, activeFarm, fullName, email, refreshUser } = useUser()
+  const router = useRouter()
+  const [setup] = useState(() => resolveSetup(farms.length, getSetupStep(email)))
+  const [setupDone, setSetupDone] = useState(false)
+
+  if (setup.show !== "none" && !setupDone) {
+    return (
+      <SetupFlow
+        initialStep={setup.show === "wizard" ? setup.step : null}
+        farm={activeFarm ?? farms[0] ?? null}
+        owner={email}
+        fullName={fullName}
+        email={email}
+        onFinish={(href) => {
+          setSetupDone(true)
+          if (href) router.push(href)
+          // Nowe gospodarstwo w sidebarze i nagłówku.
+          refreshUser()
+        }}
+      />
+    )
   }
 
   return (

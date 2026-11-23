@@ -15,6 +15,8 @@ import { getAccessToken } from "@/lib/auth/token-storage"
 interface UserContextType {
   farms: Farm[]
   activeFarm: Farm | null
+  fullName: string | null
+  email: string | null
   loading: boolean
   /**
    * Komunikat, gdy nie udało się pobrać danych użytkownika (sieć, błąd serwera).
@@ -32,6 +34,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [farms, setFarms] = useState<Farm[]>([])
   const [activeFarmId, setActiveFarmId] = useState<string | null>(null)
+  const [profile, setProfile] = useState<{ fullName: string | null; email: string | null }>({
+    fullName: null,
+    email: null,
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -42,6 +48,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       const { data } = await userService.getUserInfo()
       setFarms(data.farms)
       setActiveFarmId(data.activeFarmId)
+      setProfile({ fullName: data.fullName ?? null, email: data.email ?? null })
     } catch (err) {
       console.error("Błąd ładowania danych użytkownika", err)
       // 401 kończy sesję w api-client, a RequireAuth przenosi do logowania.
@@ -82,6 +89,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         farms,
         activeFarm,
+        fullName: profile.fullName,
+        email: profile.email,
         loading,
         error,
         switchFarm,
