@@ -1,6 +1,7 @@
 import { cookies } from "next/headers"
 import { UserProvider } from "@/context/UserContext"
 import { DashboardContent } from "@/components/dashboard-content"
+import { RequireAuth } from "@/components/auth/require-auth"
 
 export const dynamic = "force-dynamic"
 
@@ -14,10 +15,12 @@ export default async function DashboardLayout({
   const defaultOpen = sidebarState !== "false"
 
   return (
-    <UserProvider>
-      <DashboardContent defaultOpen={defaultOpen}>
-        {children}
-      </DashboardContent>
-    </UserProvider>
+    <RequireAuth>
+      <UserProvider>
+        <DashboardContent defaultOpen={defaultOpen}>
+          {children}
+        </DashboardContent>
+      </UserProvider>
+    </RequireAuth>
   )
 }

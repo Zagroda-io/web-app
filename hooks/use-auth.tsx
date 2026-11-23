@@ -8,6 +8,7 @@ import {
   getAccessToken,
   getRefreshToken,
   saveTokens,
+  SESSION_EXPIRED_EVENT,
 } from "@/lib/auth/token-storage"
 import { useRouter } from "next/navigation"
 
@@ -51,6 +52,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
     }
     setIsLoading(false)
+  }, [])
+
+  // api-client zgłasza wygaśnięcie sesji (401 bez możliwości odświeżenia tokena).
+  useEffect(() => {
+    const onExpired = () =>
+      setAuthState({ user: null, accessToken: null, isAuthenticated: false })
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired)
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired)
   }, [])
 
   const login = (

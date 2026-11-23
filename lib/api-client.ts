@@ -2,7 +2,7 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios"
 import { config } from "./config"
 import { TokenResponse } from "@/types/auth"
 import {
-  clearTokens,
+  expireSession,
   getAccessToken,
   getRefreshToken,
   updateTokens,
@@ -72,7 +72,7 @@ apiClient.interceptors.response.use(
       const refreshToken = getRefreshToken()
       if (!refreshToken) {
         isRefreshing = false
-        // Przekierowanie do logowania lub czyszczenie stanu
+        expireSession()
         return Promise.reject(error)
       }
 
@@ -93,8 +93,8 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError, null)
-        clearTokens()
-        // Tutaj można dodać przekierowanie do strony logowania
+        // RequireAuth przeniesie użytkownika do logowania.
+        expireSession()
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false

@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useState,
 } from "react"
+import { isAxiosError } from "axios"
 import { userService } from "@/lib/api/user-service"
 import { Farm } from "@/types/farm"
 import { getAccessToken } from "@/lib/auth/token-storage"
@@ -15,6 +16,11 @@ interface UserContextType {
   farms: Farm[]
   activeFarm: Farm | null
   loading: boolean
+  /**
+   * Komunikat, gdy nie udało się pobrać danych użytkownika (sieć, błąd serwera).
+   * Wtedy nie wiemy, czy gospodarstwa są — panel nie może pokazać onboardingu.
+   */
+  error: string | null
   switchFarm: (farmId: string) => Promise<void>
   refreshUser: () => Promise<void>
 }
@@ -27,15 +33,25 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   const [farms, setFarms] = useState<Farm[]>([])
   const [activeFarmId, setActiveFarmId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true)
+      setError(null)
       const { data } = await userService.getUserInfo()
       setFarms(data.farms)
       setActiveFarmId(data.activeFarmId)
     } catch (err) {
       console.error("Błąd ładowania danych użytkownika", err)
+      // 401 kończy sesję w api-client, a RequireAuth przenosi do logowania.
+      if (!(isAxiosError(err) && err.response?.status === 401)) {
+        setError(
+          isAxiosError(err) && !err.response
+            ? "Nie możemy połączyć się z serwerem. Sprawdź internet i spróbuj ponownie."
+            : "Nie udało się wczytać danych gospodarstwa. Spróbuj ponownie za chwilę."
+        )
+      }
     } finally {
       setLoading(false)
     }
@@ -63,7 +79,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <UserContext.Provider
-      value={{ farms, activeFarm, loading, switchFarm, refreshUser: loadData }}
+      value={{
+        farms,
+        activeFarm,
+        loading,
+        error,
+        switchFarm,
+        refreshUser: loadData,
+      }}
     >
       {children}
     </UserContext.Provider>

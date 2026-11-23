@@ -48,3 +48,14 @@ export function clearTokens() {
     store.removeItem(REFRESH)
   }
 }
+
+/** Zdarzenie okna: sesja wygasła (401, odświeżenie tokena się nie udało). Słucha go AuthProvider. */
+export const SESSION_EXPIRED_EVENT = "zagroda:session-expired"
+
+/** Kończy sesję po stronie przeglądarki i daje znać aplikacji, żeby wróciła do logowania. */
+export function expireSession() {
+  clearTokens()
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
+  }
+}
